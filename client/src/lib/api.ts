@@ -88,7 +88,9 @@ export async function api<T>(path: string, init?: RequestInit): Promise<T> {
     return fetch(`${BASE_URL}${path}`, {
       ...init,
       headers: {
-        "Content-Type": "application/json",
+        // Only claim JSON when a body exists — Fastify 400s on
+        // content-type: application/json with an empty body.
+        ...(init?.body ? { "Content-Type": "application/json" } : {}),
         ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
         ...init?.headers,
       },
