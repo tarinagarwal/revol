@@ -28,6 +28,8 @@ const matchSchema = new Schema(
     /** Epic 8 fills these as conversation earns the reveal. */
     messageCount: { type: Number, default: 0 },
     lastMessageAt: { type: Date, default: null },
+    /** Latest AI conversation-quality read (0-100) — drives reveal unlocks. */
+    qualityScore: { type: Number, default: 0 },
   },
   { timestamps: true },
 );

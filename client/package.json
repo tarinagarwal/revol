@@ -1,7 +1,7 @@
 {
   "name": "revol-client",
   "private": true,
-  "version": "0.1.7",
+  "version": "0.1.8",
   "description": "Revol — shared React UI (web / Capacitor mobile / Electron desktop)",
   "type": "module",
   "main": "electron/dist/main.cjs",
@@ -37,7 +37,6 @@
     "react-dom": "^19.1.0",
     "react-hook-form": "^7.56.0",
     "react-router-dom": "^7.5.0",
-    "socket.io-client": "^4.8.1",
     "zod": "^3.24.2",
     "zustand": "^5.0.3"
   },

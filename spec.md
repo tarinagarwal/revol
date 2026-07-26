@@ -272,7 +272,8 @@ AI compatibility matching · blurred-profile / progressive reveal mechanic · ch
 - [ ] Anticipation/pacing logic (daily match cadence via QStash schedules + delayed reveal unlocks)
 
 ### EPIC 8 — Realtime Chat
-- [ ] Server: Socket.IO gateway, auth handshake, rooms
+- [x] Server: realtime gateway, auth handshake, per-user channels
+  *(Decision 2026-07-26: **SSE + Upstash Redis pub/sub** instead of Socket.IO. `@upstash/realtime` is Next.js-shaped (Web Streams + Zod v4) and doesn't fit Fastify; raw SSE gives browser-native auto-reconnect, no sticky sessions on Cloud Run, and cross-instance fanout through the Redis we already run. Socket.IO removed from deps.)*
 - [ ] Server: message model, history, read receipts, typing
 - [ ] Server: AI icebreaker injection + conversation-quality scoring
 - [ ] Client: chat screen (custom bubbles), typing, delivery/read states

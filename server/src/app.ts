@@ -12,8 +12,11 @@ import { profileRoutes } from "./modules/profile/profile.routes.js";
 import { aiRoutes } from "./modules/ai/ai.routes.js";
 import { jobRoutes } from "./routes/jobs.js";
 import { matchesRoutes } from "./modules/matches/matches.routes.js";
+import { preferencesRoutes } from "./modules/preferences/preferences.routes.js";
+import { chatRoutes } from "./modules/chat/chat.routes.js";
 import "./modules/ai/ai.jobs.js"; // registers job handlers (side effect)
 import "./modules/discovery/discovery.jobs.js"; // daily-matches cron handler
+import "./modules/chat/chat.jobs.js"; // reveal + voice-note handlers
 
 /** Builds the Fastify app. Plugins + module routes register here per epic. */
 export async function buildApp(): Promise<FastifyInstance> {
@@ -40,6 +43,8 @@ export async function buildApp(): Promise<FastifyInstance> {
   await app.register(discoveryRoutes);
   await app.register(matchesRoutes);
   await app.register(profileRoutes);
+  await app.register(preferencesRoutes);
+  await app.register(chatRoutes);
   await app.register(aiRoutes);
   await app.register(jobRoutes);
 

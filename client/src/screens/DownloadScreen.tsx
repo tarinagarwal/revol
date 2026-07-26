@@ -13,11 +13,14 @@ import {
 import { NavBar } from "@/components/layout/NavBar";
 import { Footer } from "@/components/layout/Footer";
 
-const RELEASES_API = "https://api.github.com/repos/tarinagarwal/revol/releases/latest";
+// Read several releases, not just /latest: the release is created the moment a
+// tag lands, so /latest is assetless for the minutes CI takes to build. We fall
+// back to the newest release that actually carries each platform's artifact.
+const RELEASES_API = "https://api.github.com/repos/tarinagarwal/revol/releases?per_page=10";
 const RELEASES_PAGE = "https://github.com/tarinagarwal/revol/releases/latest";
 
 type ReleaseAsset = { name: string; browser_download_url: string; size: number };
-type Release = { tag_name: string; published_at: string; assets: ReleaseAsset[] };
+type Release = { tag_name: string; published_at: string; draft: boolean; assets: ReleaseAsset[] };
 
 function formatSize(bytes: number): string {
   if (bytes > 1024 * 1024) return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
@@ -73,15 +76,28 @@ export function DownloadScreen() {
   const detected = detectPlatform();
 
   const { data, isLoading } = useQuery({
-    queryKey: ["latest-release"],
-    queryFn: async (): Promise<Release> => {
+    queryKey: ["releases"],
+    queryFn: async (): Promise<Release[]> => {
       const res = await fetch(RELEASES_API, { headers: { Accept: "application/vnd.github+json" } });
       if (!res.ok) throw new Error("release fetch failed");
-      return res.json() as Promise<Release>;
+      const all = (await res.json()) as Release[];
+      return all.filter((r) => !r.draft);
     },
-    staleTime: 5 * 60_000,
+    staleTime: 60_000,
+    refetchOnMount: "always",
     retry: 1,
   });
+
+  const releases = data ?? [];
+  const newest = releases[0];
+  /** Newest release that actually has this platform's artifact attached. */
+  const resolveAsset = (match: (a: ReleaseAsset) => boolean) => {
+    for (const r of releases) {
+      const asset = r.assets.find(match);
+      if (asset) return { asset, tag: r.tag_name };
+    }
+    return null;
+  };
 
   return (
     <div className="min-h-full bg-black text-ivory">
@@ -103,9 +119,9 @@ export function DownloadScreen() {
             <Text variant="body" tone="dim" className="max-w-lg leading-relaxed">
               The same cinematic experience on desktop, mobile and web — with updates that arrive on their own.
             </Text>
-            {data && (
+            {newest && (
               <Text variant="caption" tone="dim">
-                Latest release {data.tag_name} · {new Date(data.published_at).toLocaleDateString()}
+                Latest release {newest.tag_name} · {new Date(newest.published_at).toLocaleDateString()}
               </Text>
             )}
           </Stack>
@@ -115,7 +131,8 @@ export function DownloadScreen() {
       <section className="mx-auto max-w-5xl px-6 pb-24">
         <Grid gap={6} className="grid-cols-1 md:grid-cols-3">
           {platforms.map((p, i) => {
-            const asset = data?.assets.find(p.match);
+            const resolved = resolveAsset(p.match);
+            const asset = resolved?.asset;
             const recommended =
               (p.key === "windows" && detected === "windows") ||
               (p.key === "android" && detected === "android") ||
@@ -151,7 +168,8 @@ export function DownloadScreen() {
                           Download
                         </Button>
                         <Text variant="caption" tone="dim" className="text-center">
-                          {asset.name} · {formatSize(asset.size)}
+                          {resolved?.tag} · {formatSize(asset.size)}
+                          {resolved && newest && resolved.tag !== newest.tag_name ? " · build pending" : ""}
                         </Text>
                       </Stack>
                     ) : (

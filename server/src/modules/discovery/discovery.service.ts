@@ -4,6 +4,7 @@ import { Match, pairKeyFor } from "../../db/models/Match.js";
 import { Profile } from "../../db/models/Profile.js";
 import { User } from "../../db/models/User.js";
 import { Media } from "../../db/models/Media.js";
+import { Preferences, getOrCreatePreferences, type PreferencesDoc } from "../../db/models/Preferences.js";
 import { getVector } from "../../lib/upstash.js";
 import { signedReadUrl } from "../../lib/storage/gcs.js";
 import { compatibilityReport } from "../ai/ai.service.js";
@@ -41,6 +42,23 @@ function age(birthdate: Date): number {
 }
 
 /**
+ * Discovery preferences must hold in BOTH directions — a candidate has to
+ * fit my filters and I have to fit theirs. Consent, not just targeting.
+ */
+function preferencesSatisfied(
+  seekerPrefs: PreferencesDoc | null,
+  seekerCity: string,
+  candidate: { age: number; city: string; intent: string | null | undefined },
+): boolean {
+  if (!seekerPrefs) return true;
+  if (candidate.age < (seekerPrefs.ageMin ?? 18) || candidate.age > (seekerPrefs.ageMax ?? 100)) return false;
+  if (seekerPrefs.cityPreference === "same" && candidate.city.toLowerCase() !== seekerCity.toLowerCase()) return false;
+  const wanted: string[] = seekerPrefs.intents ?? [];
+  if (wanted.length > 0 && (!candidate.intent || !wanted.includes(candidate.intent))) return false;
+  return true;
+}
+
+/**
  * People who already liked this user and are still unanswered — they jump
  * the queue. Mutuality can actually happen under one-a-day pacing.
  */
@@ -53,6 +71,9 @@ async function pendingLikers(userId: string, excluded: Set<string>): Promise<str
 async function generateMatch(userId: string, day: string) {
   const me = await Profile.findOne({ userId });
   if (!me?.onboarding?.completed || !me.basics) throw new DiscoveryError(400, "Finish onboarding first");
+
+  const myPrefs = await getOrCreatePreferences(userId);
+  if (myPrefs.paused) return null; // discovery paused by the member
 
   // Everyone this user has already been shown — never repeat.
   const seen = await DailyMatch.find({ userId }).select("candidateUserId");
@@ -88,6 +109,18 @@ async function generateMatch(userId: string, day: string) {
     const candidate = await Profile.findOne({ userId: entry.id });
     if (!candidate?.onboarding?.completed || !candidate.basics) continue;
     if (!orientationCompatible(me.basics, candidate.basics)) continue;
+
+    // Preferences, enforced both ways.
+    const theirPrefs = await Preferences.findOne({ userId: entry.id });
+    const candidateFacts = {
+      age: age(candidate.basics.birthdate),
+      city: candidate.basics.city,
+      intent: candidate.intent,
+    };
+    const myFacts = { age: age(me.basics.birthdate), city: me.basics.city, intent: me.intent };
+    if (!preferencesSatisfied(myPrefs, me.basics.city, candidateFacts)) continue;
+    if (theirPrefs?.paused) continue;
+    if (!preferencesSatisfied(theirPrefs, candidate.basics.city, myFacts)) continue;
 
     // AI chemistry read — the substance of the card.
     const report = await compatibilityReport(userId, entry.id).catch(() => null);

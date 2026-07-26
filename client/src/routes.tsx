@@ -47,6 +47,7 @@ export function AppRoutes() {
           <Route path="/app/matches" element={<MatchesScreen />} />
           <Route path="/app/matches/:id" element={<MatchDetailScreen />} />
           <Route path="/app/chat" element={<ChatScreen />} />
+          <Route path="/app/chat/:matchId" element={<ChatScreen />} />
           <Route path="/app/profile" element={<ProfileScreen />} />
           <Route path="/app/photos" element={<PhotosScreen />} />
           <Route path="/app/settings" element={<SettingsScreen />} />
