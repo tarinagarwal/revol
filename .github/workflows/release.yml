@@ -36,6 +36,10 @@ jobs:
           cache: npm
           cache-dependency-path: client/package-lock.json
       - run: npm ci
+      # Belt-and-braces: guarantees the production API URL is baked in even if
+      # client/.env.production ever goes missing again.
+      - run: echo "VITE_API_URL=https://revol-server-831212759152.asia-south1.run.app" > .env.production
+        shell: bash
       # electron-builder publishes the NSIS installer + latest.yml straight to the GitHub Release
       - run: npm run electron:publish
         env:
@@ -59,6 +63,10 @@ jobs:
           distribution: temurin
           java-version: 21
       - run: npm ci
+      # Belt-and-braces: guarantees the production API URL is baked in even if
+      # client/.env.production ever goes missing again.
+      - run: echo "VITE_API_URL=https://revol-server-831212759152.asia-south1.run.app" > .env.production
+        shell: bash
       - run: npm run build
       - run: npx cap sync android
       - name: Build debug APK (unsigned release signing lands with store setup)

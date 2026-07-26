@@ -2,6 +2,9 @@
 .env
 .env.*
 !.env.example
+# Public build-time config (API URL only — no secrets). MUST be committed or
+# CI builds fall back to localhost and native apps can't reach the server.
+!client/.env.production
 *service-account*.json
 
 # --- Dependencies ---
