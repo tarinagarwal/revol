@@ -11,6 +11,7 @@ import { ResetPasswordScreen } from "@/screens/auth/ResetPasswordScreen";
 import { OnboardingScreen } from "@/screens/OnboardingScreen";
 import { TodayScreen } from "@/screens/app/TodayScreen";
 import { MatchesScreen } from "@/screens/app/MatchesScreen";
+import { MatchDetailScreen } from "@/screens/app/MatchDetailScreen";
 import { ChatScreen } from "@/screens/app/ChatScreen";
 import { ProfileScreen } from "@/screens/app/ProfileScreen";
 import { PhotosScreen } from "@/screens/app/PhotosScreen";
@@ -44,6 +45,7 @@ export function AppRoutes() {
           <Route path="/app" element={<Navigate to="/app/today" replace />} />
           <Route path="/app/today" element={<TodayScreen />} />
           <Route path="/app/matches" element={<MatchesScreen />} />
+          <Route path="/app/matches/:id" element={<MatchDetailScreen />} />
           <Route path="/app/chat" element={<ChatScreen />} />
           <Route path="/app/profile" element={<ProfileScreen />} />
           <Route path="/app/photos" element={<PhotosScreen />} />

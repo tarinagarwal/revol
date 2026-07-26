@@ -2,9 +2,9 @@ import type { ReactNode } from "react";
 import { cn } from "@/lib/cn";
 
 type BoxProps = { children?: ReactNode; className?: string };
-type GapProps = BoxProps & { gap?: 0 | 1 | 2 | 3 | 4 | 6 | 8 | 12 | 16 };
+type GapProps = BoxProps & { gap?: 0 | 1 | 2 | 3 | 4 | 5 | 6 | 8 | 12 | 16 };
 
-const gapClasses = { 0: "gap-0", 1: "gap-1", 2: "gap-2", 3: "gap-3", 4: "gap-4", 6: "gap-6", 8: "gap-8", 12: "gap-12", 16: "gap-16" } as const;
+const gapClasses = { 0: "gap-0", 1: "gap-1", 2: "gap-2", 3: "gap-3", 4: "gap-4", 5: "gap-5", 6: "gap-6", 8: "gap-8", 12: "gap-12", 16: "gap-16" } as const;
 
 /** Vertical flex column. */
 export function Stack({ children, gap = 4, className }: GapProps) {

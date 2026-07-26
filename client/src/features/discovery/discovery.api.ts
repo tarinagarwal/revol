@@ -22,5 +22,8 @@ export type MatchCard = {
 
 export const getToday = () => api<{ match: MatchCard | null }>("/discovery/today");
 export const actOnToday = (action: "like" | "pass") =>
-  api<{ status: string }>("/discovery/today/act", { method: "POST", body: JSON.stringify({ action }) });
+  api<{ status: string; mutual: boolean; matchId?: string }>("/discovery/today/act", {
+    method: "POST",
+    body: JSON.stringify({ action }),
+  });
 export const devRefreshToday = () => api<{ match: MatchCard | null }>("/discovery/refresh", { method: "POST" });

@@ -8,7 +8,7 @@ import { getQStash } from "./upstash.js";
  * /jobs/<name>. Local dev (localhost is unreachable to QStash): run the
  * handler inline off the request path.
  */
-export type JobName = "photo-analyze" | "voice-transcribe";
+export type JobName = "photo-analyze" | "voice-transcribe" | "daily-matches";
 
 type JobHandler = (payload: Record<string, unknown>) => Promise<void>;
 
