@@ -10,6 +10,7 @@ import { ForgotPasswordScreen } from "@/screens/auth/ForgotPasswordScreen";
 import { ResetPasswordScreen } from "@/screens/auth/ResetPasswordScreen";
 import { AppHomeScreen } from "@/screens/app/AppHomeScreen";
 import { OnboardingScreen } from "@/screens/OnboardingScreen";
+import { PhotosScreen } from "@/screens/app/PhotosScreen";
 import { RequireAuth, RedirectIfAuth, ProtectedOutlet } from "@/features/auth/guards";
 
 /** Route table. Feature epics extend the /app section. */
@@ -35,6 +36,7 @@ export function AppRoutes() {
       {/* Protected app — EVERY in-app route nests under this guard */}
       <Route element={<ProtectedOutlet />}>
         <Route path="/app" element={<AppHomeScreen />} />
+        <Route path="/app/photos" element={<PhotosScreen />} />
         {/* Future: /app/discover, /app/matches, /app/chat/:id, /app/profile ... */}
       </Route>
 

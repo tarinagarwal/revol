@@ -58,6 +58,12 @@ export async function signedReadUrl(objectPath: string, ttlMinutes = 60): Promis
   return url;
 }
 
+/** Pulls an object back down (AI analysis jobs). */
+export async function downloadMedia(objectPath: string): Promise<Buffer> {
+  const [buf] = await getBucket().file(objectPath).download();
+  return buf;
+}
+
 export async function deleteMedia(objectPath: string): Promise<void> {
   await getBucket()
     .file(objectPath)

@@ -27,7 +27,7 @@ export type OnboardingState = {
     values: string[] | null;
     interests: string[] | null;
     prompts: { promptId: string; question: string; answer: string }[] | null;
-    voiceIntro: { durationSec: number; url: string } | null;
+    voiceIntro: { durationSec: number; url: string | null } | null;
   };
 };
 
@@ -46,10 +46,11 @@ export const saveInterests = (interests: string[]) => put("interests", { interes
 export const savePrompts = (prompts: { promptId: string; answer: string }[]) => put("prompts", { prompts });
 
 export const uploadVoiceIntro = (blob: Blob, durationSec: number) => {
+  const ext = blob.type.includes("wav") ? "wav" : blob.type.includes("mp4") ? "m4a" : "webm";
   const form = new FormData();
   form.append("durationSec", String(durationSec));
-  form.append("file", blob, "voice-intro.webm");
-  return apiForm<{ ok: boolean; url: string }>("/onboarding/voice", form);
+  form.append("file", blob, `voice-intro.${ext}`);
+  return apiForm<{ ok: boolean; url: string | null }>("/onboarding/voice", form);
 };
 
 export const skipVoiceIntro = () => api<{ ok: boolean }>("/onboarding/voice", { method: "DELETE" });

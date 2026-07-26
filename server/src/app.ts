@@ -6,6 +6,10 @@ import multipart from "@fastify/multipart";
 import { authPlugin } from "./plugins/auth.js";
 import { authRoutes } from "./modules/auth/auth.routes.js";
 import { onboardingRoutes } from "./modules/onboarding/onboarding.routes.js";
+import { mediaRoutes } from "./modules/media/media.routes.js";
+import { aiRoutes } from "./modules/ai/ai.routes.js";
+import { jobRoutes } from "./routes/jobs.js";
+import "./modules/ai/ai.jobs.js"; // registers job handlers (side effect)
 
 /** Builds the Fastify app. Plugins + module routes register here per epic. */
 export async function buildApp(): Promise<FastifyInstance> {
@@ -28,6 +32,9 @@ export async function buildApp(): Promise<FastifyInstance> {
   await app.register(versionRoutes);
   await app.register(authRoutes);
   await app.register(onboardingRoutes);
+  await app.register(mediaRoutes);
+  await app.register(aiRoutes);
+  await app.register(jobRoutes);
 
   return app;
 }

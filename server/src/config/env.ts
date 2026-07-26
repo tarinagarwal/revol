@@ -34,6 +34,10 @@ const envSchema = z.object({
   QSTASH_NEXT_SIGNING_KEY: z.string().optional(),
 
   OPENROUTER_API_KEY: z.string().optional(),
+  /** OpenRouter model ids — overridable per capability. */
+  AI_TEXT_MODEL: z.string().default("google/gemini-2.5-flash"),
+  AI_VISION_MODEL: z.string().default("google/gemini-2.5-flash"),
+  AI_AUDIO_MODEL: z.string().default("google/gemini-2.5-flash"),
 
   GMAIL_USER: z.string().optional(),
   GMAIL_APP_PASSWORD: z.string().optional(),

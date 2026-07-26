@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/cn";
+import { blobToWav } from "@/lib/audio";
 import { Text } from "./Text";
 import { IconButton } from "./IconButton";
 import { MicIcon, PlayIcon, PauseIcon, CloseIcon } from "@/components/icons";
@@ -53,11 +54,17 @@ export function AudioRecorder({ onRecorded, maxSec = 60, className }: AudioRecor
       };
       rec.onstop = () => {
         stream.getTracks().forEach((t) => t.stop());
-        const blob = new Blob(chunksRef.current, { type: rec.mimeType || "audio/webm" });
-        if (urlRef.current) URL.revokeObjectURL(urlRef.current);
-        urlRef.current = URL.createObjectURL(blob);
-        setState("preview");
-        onRecorded(blob, durationRef.current);
+        const raw = new Blob(chunksRef.current, { type: rec.mimeType || "audio/webm" });
+        // WAV everywhere — AI models and every player accept it; opus doesn't.
+        void blobToWav(raw)
+          .catch(() => raw)
+          .then((finalBlob) => {
+            if (urlRef.current) URL.revokeObjectURL(urlRef.current);
+            urlRef.current = URL.createObjectURL(finalBlob);
+            audioRef.current = null;
+            setState("preview");
+            onRecorded(finalBlob, durationRef.current);
+          });
       };
       rec.start();
       recorderRef.current = rec;

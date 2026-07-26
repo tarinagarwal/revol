@@ -2,6 +2,7 @@ import type { FastifyInstance, FastifyReply } from "fastify";
 import { Profile } from "../../db/models/Profile.js";
 import { getVector } from "../../lib/upstash.js";
 import { uploadMedia, deleteMedia, signedReadUrl, validateMedia } from "../../lib/storage/gcs.js";
+import { enqueueJob } from "../../lib/jobs.js";
 import { ONBOARDING_CONFIG, PERSONALITY_QUESTIONS, PROMPTS, INTENTS } from "./onboarding.data.js";
 import {
   basicsSchema,
@@ -163,6 +164,8 @@ export async function onboardingRoutes(app: FastifyInstance): Promise<void> {
     p.set("voiceIntro", { objectPath, mimeType: file.mimetype, durationSec, transcript: null });
     p.set("onboarding.step", Math.max(p.onboarding?.step ?? 0, stepAfter("voice")));
     await p.save();
+    // Epic 5: transcription + tone read, async — enriches matching when done.
+    await enqueueJob("voice-transcribe", { userId: req.user.sub });
     return { ok: true, url: await signedReadUrl(objectPath).catch(() => null), step: p.onboarding?.step };
   });
 
