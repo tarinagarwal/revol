@@ -10,21 +10,22 @@ const manifest = {
   api: "0.1.0",
   channels: {
     desktop: {
-      latest: "0.1.0",
+      latest: "0.1.1",
       feed: "github-releases",
       mandatory: false,
     },
     mobile: {
-      latest: "0.1.0",
+      latest: "0.1.1",
       minSupported: "0.1.0",
       storeUrls: {
-        android: "",
-        ios: "",
+        // Until store listings exist, "store" = latest GitHub release.
+        android: "https://github.com/tarinagarwal/revol/releases/latest",
+        ios: "https://github.com/tarinagarwal/revol/releases/latest",
       },
       mandatory: false,
     },
     web: {
-      latest: "0.1.0",
+      latest: "0.1.1",
     },
   },
 };
