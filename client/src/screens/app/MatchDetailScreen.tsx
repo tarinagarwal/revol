@@ -10,6 +10,7 @@ import {
   Divider,
   EmptyState,
   Heading,
+  Page,
   ProgressBar,
   Reveal,
   Row,
@@ -64,11 +65,12 @@ export function MatchDetailScreen() {
   const revealProgress = ((3 - m.revealLevel) / 3) * 100;
 
   return (
-    <div className="mx-auto w-full max-w-5xl">
+    <>
       <AppHeader title={`${p.displayName ?? `${p.firstInitial}·`}, ${p.age}`} showBack />
-      <div className="grid grid-cols-1 gap-6 px-5 py-6 md:grid-cols-[minmax(0,380px)_1fr] md:items-start">
+      <Page width="full">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,360px)_1fr] lg:items-start">
         {/* Left — the person */}
-        <Stack gap={5} className="md:sticky md:top-8">
+        <Stack gap={5} className="lg:sticky lg:top-8">
           <Reveal>
             <div className="relative">
               {p.photoUrl ? (
@@ -198,6 +200,7 @@ export function MatchDetailScreen() {
           </Reveal>
         </Stack>
       </div>
-    </div>
+      </Page>
+    </>
   );
 }

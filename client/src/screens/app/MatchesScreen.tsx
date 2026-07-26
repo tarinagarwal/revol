@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { BlurImage, Card, EmptyState, Reveal, Row, Spinner, Stack, Text } from "@/components/ui";
+import { BlurImage, Card, EmptyState, Page, PageHeader, Reveal, Row, Spinner, Stack, Text } from "@/components/ui";
 import { HeartIcon, EyeOffIcon, ChevronRightIcon, SparkIcon } from "@/components/icons";
 import { getMatches } from "@/features/matches/matches.api";
 
@@ -21,7 +21,7 @@ export function MatchesScreen() {
 
   if (matches.length === 0) {
     return (
-      <Stack gap={6} className="mx-auto w-full max-w-lg px-5 py-8">
+      <Stack gap={6} className="mx-auto w-full max-w-xl px-5 py-8">
         <EmptyState
           icon={<HeartIcon size={40} />}
           title="No mutual stories yet"
@@ -32,15 +32,10 @@ export function MatchesScreen() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-5xl px-5 py-8">
+    <Page width="full">
+      <PageHeader eyebrow="Mutual" title="Your stories" subtitle={`${matches.length} connection${matches.length === 1 ? "" : "s"}`} />
       <Stack gap={6}>
-        <Stack gap={1}>
-          <Text variant="label" tone="gold">
-            Mutual
-          </Text>
-          <Text variant="heading">Your stories</Text>
-        </Stack>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
           {matches.map((m, i) => (
             <Reveal key={m.id} delay={i * 80}>
               <Card padded={false} onPress={() => void navigate(`/app/matches/${m.id}`)} className="overflow-hidden">
@@ -81,6 +76,6 @@ export function MatchesScreen() {
           ))}
         </div>
       </Stack>
-    </div>
+    </Page>
   );
 }

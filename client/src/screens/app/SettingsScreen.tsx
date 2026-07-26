@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { Button, Card, Divider, Heading, Row, Stack, Text, toast } from "@/components/ui";
+import { Button, Card, Divider, Page, PageHeader, Row, Stack, Text, toast } from "@/components/ui";
 import { ShieldIcon, LockIcon, BellIcon } from "@/components/icons";
 import { useAuthStore } from "@/store/authStore";
 import { logoutRequest } from "@/features/auth/auth.api";
@@ -16,10 +16,10 @@ export function SettingsScreen() {
   };
 
   return (
-    <Stack gap={6} className="mx-auto w-full max-w-lg px-5 py-8">
-      <Heading level={2}>Settings</Heading>
-
-      <Card padded={false} className="px-6 py-2">
+    <Page width="narrow">
+      <PageHeader eyebrow="Account" title="Settings" />
+      <Stack gap={6}>
+      <Card padded={false} className="px-5 py-2 sm:px-6">
         <Stack gap={0}>
           <Row gap={3} className="py-3">
             <Stack gap={1} className="flex-1">
@@ -69,6 +69,7 @@ export function SettingsScreen() {
       <Text variant="caption" tone="dim" className="text-center">
         Revol {__APP_VERSION__} · Chemistry before clarity
       </Text>
-    </Stack>
+      </Stack>
+    </Page>
   );
 }

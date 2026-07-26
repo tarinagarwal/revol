@@ -25,6 +25,7 @@ export { ChemistryRing } from "./ChemistryRing";
 
 // Layout
 export { Stack, Row, Grid, Spacer, Divider, SafeArea } from "./layout";
+export { Page, PageHeader } from "./Page";
 
 // Surfaces
 export { Card } from "./Card";

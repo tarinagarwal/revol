@@ -4,7 +4,7 @@ import { ChatIcon } from "@/components/icons";
 /** /app/chat — realtime conversations arrive with Epic 8. */
 export function ChatScreen() {
   return (
-    <Stack gap={6} className="mx-auto w-full max-w-lg px-5 py-8">
+    <Stack gap={6} className="mx-auto w-full max-w-xl px-5 py-8">
       <EmptyState
         icon={<ChatIcon size={40} />}
         title="Quiet, for now"

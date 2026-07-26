@@ -10,6 +10,7 @@ import {
   Divider,
   EmptyState,
   Heading,
+  Page,
   Reveal,
   Row,
   Spinner,
@@ -77,13 +78,13 @@ function MatchView({ match, onActed }: { match: MatchCard; onActed: (mutual: boo
     );
 
   return (
-    <div className="mx-auto w-full max-w-5xl px-5 py-8">
+    <Page width="full">
       <Reveal>
         <Stack gap={1} className="mb-6">
           <Text variant="label" tone="gold">
             Today's introduction
           </Text>
-          <Row gap={4} className="items-baseline">
+          <Row gap={4} className="flex-wrap items-baseline">
             <Heading level={2}>
               {c.firstInitial}·, {c.age}
             </Heading>
@@ -95,9 +96,9 @@ function MatchView({ match, onActed }: { match: MatchCard; onActed: (mutual: boo
         </Stack>
       </Reveal>
 
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-[minmax(0,400px)_1fr] md:items-start">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,360px)_1fr] lg:items-start">
         {/* Left rail — the veiled person (sticky on desktop) */}
-        <Stack gap={5} className="md:sticky md:top-8">
+        <Stack gap={5} className="lg:sticky lg:top-8">
           <Reveal delay={100}>
             <div className="relative">
               {c.photoUrl ? (
@@ -123,7 +124,7 @@ function MatchView({ match, onActed }: { match: MatchCard; onActed: (mutual: boo
               <VoicePlayer url={c.voiceUrl} title="Their voice" subtitle="Heard before seen" variant="gold" />
             </Reveal>
           )}
-          <Reveal delay={240} className="hidden md:block">
+          <Reveal delay={240} className="hidden lg:block">
             {actions}
           </Reveal>
         </Stack>
@@ -161,7 +162,7 @@ function MatchView({ match, onActed }: { match: MatchCard; onActed: (mutual: boo
           </Reveal>
 
           <Reveal delay={260}>
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 2xl:grid-cols-3">
               {c.prompts.map((p) => (
                 <Card key={p.promptId}>
                   <Stack gap={2}>
@@ -205,12 +206,12 @@ function MatchView({ match, onActed }: { match: MatchCard; onActed: (mutual: boo
           </Reveal>
 
           {/* Actions inline on mobile */}
-          <Reveal delay={400} className="md:hidden">
+          <Reveal delay={400} className="lg:hidden">
             {actions}
           </Reveal>
         </Stack>
       </div>
-    </div>
+    </Page>
   );
 }
 
@@ -262,7 +263,7 @@ export function TodayScreen() {
 
   if (!data.match) {
     return (
-      <Stack gap={6} className="mx-auto w-full max-w-lg px-5 py-8">
+      <Stack gap={6} className="mx-auto w-full max-w-xl px-5 py-8">
         <EmptyState
           icon={<InfinityIcon size={40} />}
           title="No introduction today"
