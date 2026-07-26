@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { Button, Card, Divider, Page, PageHeader, Row, Stack, Text, toast } from "@/components/ui";
-import { ShieldIcon, LockIcon, BellIcon } from "@/components/icons";
+import { LockIcon } from "@/components/icons";
 import { useAuthStore } from "@/store/authStore";
 import { logoutRequest } from "@/features/auth/auth.api";
 import { PreferencesCard } from "@/features/preferences/PreferencesCard";
@@ -33,33 +33,13 @@ export function SettingsScreen() {
           </Row>
           <Divider />
           <Row gap={3} className="py-3">
-            <BellIcon size={18} className="text-ivory-dim" />
-            <Text variant="body" tone="dim" className="flex-1">
-              Notifications
-            </Text>
-            <Text variant="caption" tone="dim">
-              Coming soon
-            </Text>
-          </Row>
-          <Divider />
-          <Row gap={3} className="py-3">
-            <LockIcon size={18} className="text-ivory-dim" />
-            <Text variant="body" tone="dim" className="flex-1">
-              Privacy
-            </Text>
-            <Text variant="caption" tone="dim">
-              Coming soon
-            </Text>
-          </Row>
-          <Divider />
-          <Row gap={3} className="py-3">
-            <ShieldIcon size={18} className="text-ivory-dim" />
-            <Text variant="body" tone="dim" className="flex-1">
-              Safety center
-            </Text>
-            <Text variant="caption" tone="dim">
-              Coming soon
-            </Text>
+            <LockIcon size={18} className="text-gold" />
+            <Stack gap={1} className="flex-1">
+              <Text variant="body">Your data stays yours</Text>
+              <Text variant="caption" tone="dim">
+                Photos are private and signed per view. Nothing is shown before chemistry earns it.
+              </Text>
+            </Stack>
           </Row>
         </Stack>
       </Card>

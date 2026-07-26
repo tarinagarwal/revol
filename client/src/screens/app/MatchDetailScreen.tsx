@@ -115,9 +115,9 @@ export function MatchDetailScreen() {
             </div>
           )}
           <div className="shrink-0">
-            <Button fullWidth disabled>
+            <Button fullWidth onPress={() => void navigate(`/app/chat/${m.id}`)}>
               <ChatIcon size={16} />
-              Conversation opens with Epic 8
+              {m.messageCount > 0 ? "Continue the conversation" : "Start the conversation"}
             </Button>
           </div>
         </div>
