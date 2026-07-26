@@ -1,7 +1,7 @@
 {
   "name": "revol-client",
   "private": true,
-  "version": "0.1.9",
+  "version": "0.2.0",
   "description": "Revol — shared React UI (web / Capacitor mobile / Electron desktop)",
   "type": "module",
   "main": "electron/dist/main.cjs",

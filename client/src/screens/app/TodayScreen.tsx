@@ -227,13 +227,15 @@ export function TodayScreen() {
 
   const refresh = () => queryClient.invalidateQueries({ queryKey: ["today-match"] });
 
-  const devRefresh = async () => {
+  /**
+   * Re-checks for today's introduction. In dev we can also discard the
+   * existing suggestion; in production this is a plain refetch.
+   */
+  const checkAgain = async () => {
     setRefreshing(true);
     try {
-      await devRefreshToday();
-      void refresh();
-    } catch (err) {
-      toast(err instanceof ApiError ? err.message : "Refresh failed", "error");
+      if (import.meta.env.DEV) await devRefreshToday().catch(() => undefined);
+      await refresh();
     } finally {
       setRefreshing(false);
     }
@@ -272,7 +274,7 @@ export function TodayScreen() {
           title="No introduction today"
           description="Revol is still quiet — as more people finish their stories, your daily introduction appears here. Quality over quantity, always."
           action={
-            <Button size="sm" variant="outline" loading={refreshing} onPress={() => void devRefresh()}>
+            <Button size="sm" variant="outline" loading={refreshing} onPress={() => void checkAgain()}>
               Check again
             </Button>
           }
