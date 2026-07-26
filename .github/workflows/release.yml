@@ -1,0 +1,56 @@
+# Release on tag: v* → desktop installers + Android APK → GitHub Releases.
+# electron-updater consumes the same release as its update feed (latest.yml).
+# iOS/macOS jobs land later (need Apple accounts + macOS signing).
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  desktop-windows:
+    runs-on: windows-latest
+    defaults:
+      run:
+        working-directory: client
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: client/package-lock.json
+      - run: npm ci
+      # electron-builder publishes the NSIS installer + latest.yml straight to the GitHub Release
+      - run: npm run electron:publish
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  android:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: client
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: client/package-lock.json
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - run: npm ci
+      - run: npm run build
+      - run: npx cap sync android
+      - name: Build debug APK (unsigned release signing lands with store setup)
+        run: cd android && chmod +x gradlew && ./gradlew assembleDebug
+      - name: Upload APK to release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: client/android/app/build/outputs/apk/debug/app-debug.apk

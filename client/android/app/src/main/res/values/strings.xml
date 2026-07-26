@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Revol</string>
+    <string name="title_activity_main">Revol</string>
+    <string name="package_name">in.looksgoodtomeow.revol</string>
+    <string name="custom_url_scheme">in.looksgoodtomeow.revol</string>
+</resources>

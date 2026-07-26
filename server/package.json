@@ -1,0 +1,30 @@
+{
+  "name": "revol-server",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Revol — Fastify API (MongoDB · Upstash · OpenRouter · GCS)",
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@fastify/cors": "^11.0.1",
+    "@upstash/qstash": "^2.7.23",
+    "@upstash/ratelimit": "^2.0.5",
+    "@upstash/redis": "^1.34.8",
+    "@upstash/vector": "^1.2.1",
+    "dotenv": "^16.5.0",
+    "fastify": "^5.3.2",
+    "mongoose": "^8.13.2",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.14.1",
+    "tsx": "^4.19.3",
+    "typescript": "^5.8.3"
+  }
+}

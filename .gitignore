@@ -1,0 +1,30 @@
+# --- Secrets / env ---
+.env
+.env.*
+!.env.example
+*service-account*.json
+
+# --- Dependencies ---
+node_modules/
+
+# --- Builds ---
+dist/
+build/
+out/
+release/
+.vite/
+
+# --- Capacitor / native ---
+client/android/app/build/
+client/ios/App/Pods/
+client/ios/App/build/
+
+# --- Electron ---
+client/electron/dist/
+
+# --- Logs / misc ---
+*.log
+.DS_Store
+Thumbs.db
+coverage/
+.turbo/

@@ -1,0 +1,130 @@
+/* ==========================================================
+   REVOL — Brand tokens (source of truth for all styling)
+   Crimson = passion / CTA · Gold = premium / accents · Black = base
+   ========================================================== */
+@import "tailwindcss";
+
+@theme {
+  /* --- Brand palette --- */
+  --color-crimson: #ff002e;
+  --color-crimson-soft: #ff3355;
+  --color-crimson-deep: #cc0025;
+  --color-gold: #d4a64a;
+  --color-gold-soft: #e3bf75;
+  --color-gold-deep: #a87f2f;
+  --color-black: #000000;
+  --color-charcoal: #1a1a1a;
+  --color-rich-black: #0d0d0d;
+  --color-ivory: #f8f6f1;
+  --color-ivory-dim: #b8b5ae;
+
+  /* --- Typography --- */
+  --font-display: "Playfair Display Variable", Georgia, serif;
+  --font-body: "Inter Variable", system-ui, sans-serif;
+
+  /* --- Tracking (cinematic wide spacing for display type) --- */
+  --tracking-cinematic: 0.35em;
+  --tracking-elegant: 0.12em;
+
+  /* --- Motion (slow, elegant, intentional) --- */
+  --ease-elegant: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-reveal: cubic-bezier(0.16, 1, 0.3, 1);
+  --duration-reveal: 900ms;
+  --duration-slow: 600ms;
+  --duration-base: 350ms;
+
+  /* --- Glow (soft, atmospheric) --- */
+  --shadow-glow-crimson: 0 0 40px 0 rgb(255 0 46 / 0.25);
+  --shadow-glow-gold: 0 0 32px 0 rgb(212 166 74 / 0.2);
+}
+
+/* --- Base: dark cinematic canvas, no default element styling leaks --- */
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background-color: var(--color-black);
+  color: var(--color-ivory);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  overscroll-behavior: none;
+}
+
+/* --- Custom scrollbar — thin, charcoal, gold on hover --- */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-charcoal) transparent;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-charcoal);
+  border-radius: 9999px;
+  border: 2px solid var(--color-black);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-gold-deep);
+}
+
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* --- Motion primitives (Epic 1 expands these) --- */
+@keyframes revol-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes revol-blur-reveal {
+  from { filter: blur(24px); opacity: 0.4; }
+  to { filter: blur(0); opacity: 1; }
+}
+
+@keyframes revol-glow-pulse {
+  0%, 100% { box-shadow: 0 0 24px 0 rgb(255 0 46 / 0.15); }
+  50% { box-shadow: 0 0 48px 4px rgb(255 0 46 / 0.35); }
+}
+
+@keyframes revol-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+@keyframes revol-sheet-up {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+@keyframes revol-drawer-left {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
+@keyframes revol-drawer-right {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(0); }
+}
+
+@keyframes revol-shimmer {
+  from { background-position: 200% 0; }
+  to { background-position: -200% 0; }
+}
+
+@keyframes revol-toast-in {
+  from { transform: translateY(12px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
