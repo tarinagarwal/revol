@@ -156,11 +156,13 @@ Code is written provider-agnostic where it matters (AI model IDs, storage adapte
 ## 5. Media & Hosting (Google Cloud)
 
 - **Media upload:** Google Cloud Storage via a storage adapter (signed upload URLs, delete, access control). Images + audio.
-- **Hosting (GCP, gcloud CLI authed):**
-  - Server → Cloud Run
-  - Web build → Cloud Storage + Cloud CDN (or Firebase Hosting)
-  - GCS buckets: media + release manifests
-  - Secrets → Secret Manager
+- **Hosting (live since 2026-07-26):**
+  - Server → Cloud Run `revol-server` (asia-south1, min-instances=1, project `revol-prod-2026`)
+  - Web → **Vercel** at https://revol-dating.vercel.app *(decision: Vercel stays; replaced the GCS+CDN plan)*
+  - Media → GCS bucket `revol-media-2026` (private, signed reads)
+  - Release artifacts → GitHub Releases (EXE/APK + electron-updater feed)
+  - Secrets → Cloud Run env vars for now (Secret Manager migration = later hardening)
+  - Brand assets: placeholder logo everywhere; real logo + app icons/splash pending from founder
 - **Database:** MongoDB (Atlas or GCP-hosted).
 
 ---
@@ -168,7 +170,7 @@ Code is written provider-agnostic where it matters (AI model IDs, storage adapte
 ## 6. Auto-Update (required on both platforms)
 
 - **Desktop:** `electron-updater` → checks GitHub Releases → custom in-app UI ("Update available / Download / Restart & Install").
-- **Mobile:** Capacitor Live Updates (OTA JS/assets) + native store-version check → custom "Update available → Go to store" screen.
+- **Mobile:** native store-version check → custom "Update available → Go to store" screen. *(OTA / Capacitor Live Updates: deliberately skipped for now — decision 2026-07-26; revisit if release cadence demands it.)*
 - **Both** driven by a server release-manifest / `/version` endpoint to control rollout. No default dialogs — all custom UI.
 
 ---
