@@ -41,7 +41,8 @@ export function UpdateManager() {
   const [dismissed, setDismissed] = useState(false);
   const [storeUrl, setStoreUrl] = useState<string | null>(null);
 
-  // Desktop wiring
+  // Desktop wiring — listeners first, then a renderer-driven silent check
+  // (no race with main's startup check: we're guaranteed to be listening).
   useEffect(() => {
     if (!desktop) return;
     desktop.update.onAvailable((info) => {
@@ -54,6 +55,7 @@ export function UpdateManager() {
     });
     desktop.update.onReady(() => setPhase("ready"));
     desktop.update.onError(() => setPhase("error"));
+    void desktop.update.check(false).catch(() => undefined);
   }, [desktop]);
 
   // Mobile wiring — native platforms only

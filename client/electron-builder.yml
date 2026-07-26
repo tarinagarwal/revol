@@ -12,10 +12,13 @@ files:
   - package.json
 
 # Auto-update feed — GitHub Releases (Epic 15)
+# releaseType: release — publish directly (default "draft" strands the EXE
+# in a draft the updater can't see, while the APK job publishes separately)
 publish:
   provider: github
   owner: tarinagarwal
   repo: revol
+  releaseType: release
 
 win:
   target:

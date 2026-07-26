@@ -3,7 +3,7 @@ interface RevolDesktopApi {
   isDesktop: true;
   getVersion: () => Promise<string>;
   update: {
-    check: () => Promise<{ dev: boolean }>;
+    check: (interactive?: boolean) => Promise<{ dev: boolean }>;
     download: () => Promise<void>;
     install: () => Promise<void>;
     onAvailable: (cb: (info: { version: string }) => void) => void;

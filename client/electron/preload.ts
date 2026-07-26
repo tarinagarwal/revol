@@ -10,7 +10,8 @@ const api = {
   getVersion: (): Promise<string> => ipcRenderer.invoke("app:version"),
 
   update: {
-    check: (): Promise<{ dev: boolean }> => ipcRenderer.invoke("update:check"),
+    check: (interactive: boolean = true): Promise<{ dev: boolean }> =>
+      ipcRenderer.invoke("update:check", interactive),
     download: (): Promise<void> => ipcRenderer.invoke("update:download"),
     install: (): Promise<void> => ipcRenderer.invoke("update:install"),
     onAvailable: (cb: (info: { version: string }) => void) => {

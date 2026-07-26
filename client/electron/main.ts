@@ -58,10 +58,12 @@ function wireAutoUpdater(): void {
     if (updateInteractive) sendUpdate("update:error", { message: err.message });
   });
 
-  ipcMain.handle("update:check", async () => {
+  ipcMain.handle("update:check", async (_e, interactive: boolean = true) => {
     if (isDev) return { dev: true };
-    updateInteractive = true;
-    await autoUpdater.checkForUpdates();
+    if (interactive) updateInteractive = true;
+    await autoUpdater.checkForUpdates().catch((err) => {
+      if (updateInteractive) sendUpdate("update:error", { message: (err as Error).message });
+    });
     return { dev: false };
   });
   ipcMain.handle("update:download", async () => {
@@ -78,9 +80,12 @@ app.whenReady().then(() => {
   wireAutoUpdater();
   createWindow();
 
+  // Startup check waits for the renderer to be listening — the renderer
+  // also triggers its own check on mount, this is the belt-and-braces pass.
   if (!isDev) {
-    // Quiet startup check — renderer shows custom UI if something's found.
-    void autoUpdater.checkForUpdates().catch(() => undefined);
+    win?.webContents.once("did-finish-load", () => {
+      setTimeout(() => void autoUpdater.checkForUpdates().catch(() => undefined), 2500);
+    });
   }
 
   app.on("activate", () => {
