@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef, useState } from "react";
+import { useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import { cn } from "@/lib/cn";
 import { Text } from "./Text";
 import { ChevronDownIcon, CheckIcon } from "@/components/icons";
@@ -31,7 +31,25 @@ export function Select({
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState(0);
   const rootRef = useRef<HTMLDivElement>(null);
+  const listRef = useRef<HTMLDivElement>(null);
   const selected = options.find((o) => o.value === value);
+
+  // On open: jump the list to the current selection; keep the active row
+  // in view while arrowing through long lists (years, cities...).
+  useLayoutEffect(() => {
+    if (!open) return;
+    const idx = Math.max(
+      options.findIndex((o) => o.value === value),
+      0,
+    );
+    setActive(idx);
+    listRef.current?.children[idx]?.scrollIntoView({ block: "center" });
+  }, [open]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    if (!open) return;
+    listRef.current?.children[active]?.scrollIntoView({ block: "nearest" });
+  }, [active, open]);
 
   useEffect(() => {
     if (!open) return;
@@ -95,8 +113,9 @@ export function Select({
       </button>
       {open && (
         <div
+          ref={listRef}
           role="listbox"
-          className="absolute top-full z-50 mt-2 w-full overflow-hidden rounded-xl border border-charcoal bg-rich-black shadow-glow-gold animate-[revol-fade-in_0.25s_var(--ease-elegant)]"
+          className="absolute top-full z-50 mt-2 max-h-60 w-full overflow-y-auto rounded-xl border border-charcoal bg-rich-black shadow-glow-gold animate-[revol-fade-in_0.25s_var(--ease-elegant)]"
         >
           {options.map((opt, idx) => (
             <button
