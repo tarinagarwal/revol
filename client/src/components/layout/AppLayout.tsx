@@ -60,18 +60,22 @@ export function AppLayout() {
   }, [queryClient]);
 
   return (
-    // lg+: the shell owns the viewport so panes can pin and scroll independently.
-    <div className="flex min-h-svh bg-black text-ivory lg:h-svh lg:overflow-hidden">
+    // lg+: the shell owns the viewport so panes pin and scroll independently.
+    // min-h-svh must be cancelled at lg — min-height beats height, so leaving
+    // it on let tall pages grow the shell and scroll the sidebar with them.
+    <div className="flex min-h-svh bg-black text-ivory lg:h-svh lg:min-h-0 lg:overflow-hidden">
       {/* Desktop sidebar */}
-      <aside className="hidden h-svh w-60 shrink-0 flex-col border-r border-charcoal px-4 py-6 lg:flex">
-        <NavLink to="/app/today" className="mb-10 flex items-center gap-3 px-2 no-underline">
-          <InfinityHeartIcon size={28} className="text-crimson" />
-          <span className="font-display text-lg tracking-cinematic uppercase text-gold">revol</span>
-        </NavLink>
-        <div className="mb-4 flex justify-end">
+      <aside className="hidden h-svh w-60 shrink-0 flex-col border-r border-charcoal px-4 py-5 lg:flex">
+        {/* Brand and bell share one row — a standalone bell row wasted space
+            and pushed the footer past the viewport. */}
+        <div className="mb-8 flex shrink-0 items-center justify-between gap-2">
+          <NavLink to="/app/today" className="flex min-w-0 items-center gap-2.5 px-1 no-underline">
+            <InfinityHeartIcon size={26} className="shrink-0 text-crimson" />
+            <span className="truncate font-display text-lg tracking-cinematic uppercase text-gold">revol</span>
+          </NavLink>
           <NotificationBell onOpen={() => setNotificationsOpen(true)} />
         </div>
-        <nav aria-label="App" className="flex flex-col gap-1">
+        <nav aria-label="App" className="flex min-h-0 flex-col gap-1 overflow-y-auto">
           {items.map((item) => (
             <NavLink
               key={item.path}
@@ -89,7 +93,7 @@ export function AppLayout() {
             </NavLink>
           ))}
         </nav>
-        <div className="mt-auto flex flex-col gap-1">
+        <div className="mt-auto flex shrink-0 flex-col gap-1 pt-4">
           <NavLink
             to="/app/settings"
             className={({ isActive }) =>
@@ -112,7 +116,7 @@ export function AppLayout() {
       </aside>
 
       {/* Content */}
-      <div className="flex min-w-0 flex-1 flex-col lg:h-svh lg:overflow-hidden">
+      <div className="flex min-w-0 flex-1 flex-col lg:h-svh lg:min-h-0 lg:overflow-hidden">
         {/* Mobile top bar */}
         <header className="sticky top-0 z-70 flex items-center justify-between border-b border-charcoal bg-black/90 px-5 py-3 backdrop-blur lg:hidden pt-[max(0.75rem,env(safe-area-inset-top))]">
           <NavLink to="/app/today" className="flex items-center gap-2.5 no-underline">
