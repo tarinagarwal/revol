@@ -1,6 +1,9 @@
 import type { ReactNode } from "react";
 import { Navigate, useLocation } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import { useAuthStore } from "@/store/authStore";
+import { getOnboardingState } from "@/features/onboarding/onboarding.api";
+import { Screen, Spinner } from "@/components/ui";
 
 /** Blocks unauthenticated users; unverified users go finish OTP. */
 export function RequireAuth({ children }: { children: ReactNode }) {
@@ -12,6 +15,23 @@ export function RequireAuth({ children }: { children: ReactNode }) {
   }
   if (!user.emailVerified) {
     return <Navigate to="/auth/verify" state={{ email: user.email }} replace />;
+  }
+  return children;
+}
+
+/** Inside RequireAuth: sends unfinished profiles to onboarding. */
+export function RequireOnboarded({ children }: { children: ReactNode }) {
+  const { data, isLoading } = useQuery({ queryKey: ["onboarding-state"], queryFn: getOnboardingState });
+
+  if (isLoading) {
+    return (
+      <Screen centered>
+        <Spinner size={32} />
+      </Screen>
+    );
+  }
+  if (data && !data.completed) {
+    return <Navigate to="/onboarding" replace />;
   }
   return children;
 }

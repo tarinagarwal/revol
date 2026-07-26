@@ -8,7 +8,7 @@ type InputProps = {
   hint?: string;
   error?: string;
   placeholder?: string;
-  type?: "text" | "email" | "password" | "number" | "tel";
+  type?: "text" | "email" | "password" | "number" | "tel" | "date";
   name?: string;
   value?: string;
   defaultValue?: string;

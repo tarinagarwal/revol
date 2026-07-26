@@ -63,6 +63,25 @@ async function tryRefresh(): Promise<boolean> {
   return refreshing;
 }
 
+/** Multipart upload variant — browser sets the boundary content-type. */
+export async function apiForm<T>(path: string, form: FormData): Promise<T> {
+  const doFetch = () => {
+    const { accessToken } = useAuthStore.getState();
+    return fetch(`${BASE_URL}${path}`, {
+      method: "POST",
+      headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
+      body: form,
+    });
+  };
+  let res = await doFetch();
+  if (res.status === 401 && useAuthStore.getState().refreshToken) {
+    const ok = await tryRefresh();
+    if (ok) res = await doFetch();
+  }
+  if (!res.ok) throw await parseError(res);
+  return res.json() as Promise<T>;
+}
+
 export async function api<T>(path: string, init?: RequestInit): Promise<T> {
   const doFetch = () => {
     const { accessToken } = useAuthStore.getState();

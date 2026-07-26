@@ -15,6 +15,9 @@ export { Checkbox } from "./Checkbox";
 export { Toggle } from "./Toggle";
 export { RadioGroup, type RadioOption } from "./Radio";
 export { OtpInput } from "./OtpInput";
+export { Chip, ChipGroup } from "./Chip";
+export { Scale } from "./Scale";
+export { AudioRecorder } from "./AudioRecorder";
 
 // Layout
 export { Stack, Row, Grid, Spacer, Divider, SafeArea } from "./layout";

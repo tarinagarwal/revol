@@ -47,11 +47,23 @@ body,
 
 body {
   margin: 0;
+  color-scheme: dark; /* native pickers (date, etc.) render dark */
   background-color: var(--color-black);
   color: var(--color-ivory);
   font-family: var(--font-body);
   -webkit-font-smoothing: antialiased;
   overscroll-behavior: none;
+}
+
+/* --- Autofill: kill the browser's white flash, keep our dark glass --- */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+textarea:-webkit-autofill {
+  -webkit-box-shadow: 0 0 0 1000px var(--color-rich-black) inset;
+  -webkit-text-fill-color: var(--color-ivory);
+  caret-color: var(--color-ivory);
+  transition: background-color 9999s ease-in-out 0s;
 }
 
 /* --- Custom scrollbar — thin, charcoal, gold on hover --- */

@@ -9,7 +9,8 @@ import { VerifyEmailScreen } from "@/screens/auth/VerifyEmailScreen";
 import { ForgotPasswordScreen } from "@/screens/auth/ForgotPasswordScreen";
 import { ResetPasswordScreen } from "@/screens/auth/ResetPasswordScreen";
 import { AppHomeScreen } from "@/screens/app/AppHomeScreen";
-import { RequireAuth, RedirectIfAuth } from "@/features/auth/guards";
+import { OnboardingScreen } from "@/screens/OnboardingScreen";
+import { RequireAuth, RedirectIfAuth, RequireOnboarded } from "@/features/auth/guards";
 
 /** Route table. Feature epics extend the /app section. */
 export function AppRoutes() {
@@ -29,7 +30,8 @@ export function AppRoutes() {
       <Route path="/auth/reset" element={<RedirectIfAuth><ResetPasswordScreen /></RedirectIfAuth>} />
 
       {/* Protected app */}
-      <Route path="/app" element={<RequireAuth><AppHomeScreen /></RequireAuth>} />
+      <Route path="/onboarding" element={<RequireAuth><OnboardingScreen /></RequireAuth>} />
+      <Route path="/app" element={<RequireAuth><RequireOnboarded><AppHomeScreen /></RequireOnboarded></RequireAuth>} />
 
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
