@@ -11,7 +11,19 @@ permissions:
   contents: write
 
 jobs:
+  # Pre-create the release once — desktop + android jobs only attach assets.
+  # Without this, parallel jobs race to create it and one loses (dup releases,
+  # failed uploads — bitten by this on v0.1.2).
+  create-release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: gh release create "$GITHUB_REF_NAME" --title "${GITHUB_REF_NAME#v}" --notes "Revol $GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" || echo "release already exists"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
   desktop-windows:
+    needs: create-release
     runs-on: windows-latest
     defaults:
       run:
@@ -30,6 +42,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   android:
+    needs: create-release
     runs-on: ubuntu-latest
     defaults:
       run:
