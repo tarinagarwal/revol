@@ -1,10 +1,9 @@
 import { Media } from "../../db/models/Media.js";
 import { Profile } from "../../db/models/Profile.js";
-import { getVector } from "../../lib/upstash.js";
 import { registerJobHandler } from "../../lib/jobs.js";
 import { downloadMedia } from "../../lib/storage/gcs.js";
 import { analyzePhoto, analyzeVoice } from "./ai.service.js";
-import { buildProfileText } from "../onboarding/profile-text.js";
+import { syncProfileVector } from "../onboarding/vector-sync.js";
 
 /**
  * Async AI post-processing (Epic 5). Fired after uploads — QStash in prod,
@@ -42,21 +41,7 @@ registerJobHandler("voice-transcribe", async (payload) => {
 
   // Transcript enriches the matching substrate — resync the embedding.
   if (profile.onboarding?.completed) {
-    await getVector()
-      .upsert({
-        id: `profile:${userId}`,
-        data: buildProfileText(profile),
-        metadata: {
-          userId,
-          gender: profile.basics?.gender ?? "",
-          interestedIn: profile.basics?.interestedIn ?? [],
-          intent: profile.intent ?? "",
-          city: profile.basics?.city ?? "",
-        },
-      })
-      .catch((err) => console.warn("[jobs] vector resync failed:", (err as Error).message));
-    profile.set("vectorSyncedAt", new Date());
-    await profile.save();
+    await syncProfileVector(profile);
   }
   console.log(`[jobs] voice transcribed for ${userId}: "${result.transcript.slice(0, 60)}..."`);
 });

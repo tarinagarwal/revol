@@ -52,10 +52,16 @@ export async function uploadMedia(
 
 /** V4 signed read URL (default 1h). */
 export async function signedReadUrl(objectPath: string, ttlMinutes = 60): Promise<string> {
-  const [url] = await getBucket()
-    .file(objectPath)
-    .getSignedUrl({ version: "v4", action: "read", expires: Date.now() + ttlMinutes * 60_000 });
-  return url;
+  try {
+    const [url] = await getBucket()
+      .file(objectPath)
+      .getSignedUrl({ version: "v4", action: "read", expires: Date.now() + ttlMinutes * 60_000 });
+    return url;
+  } catch (err) {
+    // Callers null-coalesce, but the failure must never be invisible again.
+    console.warn(`[gcs] signedReadUrl failed for ${objectPath}: ${(err as Error).message}`);
+    throw err;
+  }
 }
 
 /** Pulls an object back down (AI analysis jobs). */

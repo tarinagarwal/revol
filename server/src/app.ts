@@ -7,6 +7,8 @@ import { authPlugin } from "./plugins/auth.js";
 import { authRoutes } from "./modules/auth/auth.routes.js";
 import { onboardingRoutes } from "./modules/onboarding/onboarding.routes.js";
 import { mediaRoutes } from "./modules/media/media.routes.js";
+import { discoveryRoutes } from "./modules/discovery/discovery.routes.js";
+import { profileRoutes } from "./modules/profile/profile.routes.js";
 import { aiRoutes } from "./modules/ai/ai.routes.js";
 import { jobRoutes } from "./routes/jobs.js";
 import "./modules/ai/ai.jobs.js"; // registers job handlers (side effect)
@@ -33,6 +35,8 @@ export async function buildApp(): Promise<FastifyInstance> {
   await app.register(authRoutes);
   await app.register(onboardingRoutes);
   await app.register(mediaRoutes);
+  await app.register(discoveryRoutes);
+  await app.register(profileRoutes);
   await app.register(aiRoutes);
   await app.register(jobRoutes);
 

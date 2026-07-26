@@ -111,7 +111,8 @@ Handles:
 
 | Product | Role in Revol |
 |---|---|
-| **Redis** | Cache, sessions, Socket.IO adapter, ratelimit backing |
+| **Redis** | Cache, sessions, ratelimit backing, realtime backbone |
+| **Realtime (`@upstash/realtime`)** | Epic 8 primary candidate for chat/live events — type-safe pub/sub over Redis Streams (SSE), no extra infra. Socket.IO on the warm Cloud Run instance is the fallback if it falls short. |
 | **Vector** | Compatibility matching + chemistry scoring by similarity. Embeddings handled by Vector's **hosted BGE_M3 model** (multilingual, 1024-dim, COSINE) — we send raw text, Upstash embeds + stores. No OpenRouter embedding call, no ML pipeline. |
 | **QStash** | Background jobs + scheduling over HTTP: one-meaningful-match daily pacing, delayed reveal unlocks, notification dispatch, AI-call retries, media→AI post-processing, webhooks, cron. Calls back into the public Cloud Run URL. |
 | **Ratelimit** | `@upstash/ratelimit` on Redis — AI cost guardrails per user + auth endpoint protection. |

@@ -20,6 +20,8 @@ export { Chip, ChipGroup } from "./Chip";
 export { Scale } from "./Scale";
 export { AudioRecorder } from "./AudioRecorder";
 export { FilePicker } from "./FilePicker";
+export { VoicePlayer } from "./VoicePlayer";
+export { ChemistryRing } from "./ChemistryRing";
 
 // Layout
 export { Stack, Row, Grid, Spacer, Divider, SafeArea } from "./layout";

@@ -1,9 +1,9 @@
 import type { FastifyInstance, FastifyReply } from "fastify";
 import { Profile } from "../../db/models/Profile.js";
-import { getVector } from "../../lib/upstash.js";
 import { uploadMedia, deleteMedia, signedReadUrl, validateMedia } from "../../lib/storage/gcs.js";
 import { enqueueJob } from "../../lib/jobs.js";
-import { ONBOARDING_CONFIG, PERSONALITY_QUESTIONS, PROMPTS, INTENTS } from "./onboarding.data.js";
+import { syncProfileVector } from "./vector-sync.js";
+import { ONBOARDING_CONFIG, PROMPTS } from "./onboarding.data.js";
 import {
   basicsSchema,
   intentSchema,
@@ -24,29 +24,15 @@ async function getOrCreateProfile(userId: string) {
   return (await Profile.findOne({ userId })) ?? (await Profile.create({ userId }));
 }
 
-function bad(reply: FastifyReply, message: string) {
-  return reply.status(400).send({ error: message });
+/** Post-completion edits change the matching substrate — re-embed async. */
+function resyncIfCompleted(p: InstanceType<typeof Profile>): void {
+  if (p.onboarding?.completed) {
+    void syncProfileVector(p);
+  }
 }
 
-/** The text Upstash Vector embeds (hosted BGE_M3) — the matching substrate. */
-function buildProfileText(p: InstanceType<typeof Profile>): string {
-  const persona = PERSONALITY_QUESTIONS.map((q) => {
-    const v = p.personality?.get(q.id) ?? 3;
-    const lean = v <= 2 ? q.low : v >= 4 ? q.high : `between ${q.low} and ${q.high}`;
-    return `${q.text} Leans: ${lean} (${v}/5)`;
-  }).join(" ");
-  const prompts = (p.prompts ?? []).map((pr) => `${pr.question} ${pr.answer}`).join(" ");
-  const intentLabel = INTENTS.find((i) => i.id === p.intent)?.label ?? p.intent ?? "";
-  return [
-    `Intent: ${intentLabel}.`,
-    `Values: ${(p.values ?? []).join(", ")}.`,
-    `Interests: ${(p.interests ?? []).join(", ")}.`,
-    `Personality: ${persona}`,
-    `In their words: ${prompts}`,
-    p.voiceIntro?.transcript ? `Voice intro: ${p.voiceIntro.transcript}` : "",
-  ]
-    .filter(Boolean)
-    .join("\n");
+function bad(reply: FastifyReply, message: string) {
+  return reply.status(400).send({ error: message });
 }
 
 export async function onboardingRoutes(app: FastifyInstance): Promise<void> {
@@ -87,6 +73,7 @@ export async function onboardingRoutes(app: FastifyInstance): Promise<void> {
     p.set("basics", parsed.data);
     p.set("onboarding.step", Math.max(p.onboarding?.step ?? 0, stepAfter("basics")));
     await p.save();
+    resyncIfCompleted(p);
     return { ok: true, step: p.onboarding?.step };
   });
 
@@ -97,6 +84,7 @@ export async function onboardingRoutes(app: FastifyInstance): Promise<void> {
     p.set("intent", parsed.data.intent);
     p.set("onboarding.step", Math.max(p.onboarding?.step ?? 0, stepAfter("intent")));
     await p.save();
+    resyncIfCompleted(p);
     return { ok: true, step: p.onboarding?.step };
   });
 
@@ -107,6 +95,7 @@ export async function onboardingRoutes(app: FastifyInstance): Promise<void> {
     p.set("personality", parsed.data.answers);
     p.set("onboarding.step", Math.max(p.onboarding?.step ?? 0, stepAfter("personality")));
     await p.save();
+    resyncIfCompleted(p);
     return { ok: true, step: p.onboarding?.step };
   });
 
@@ -117,6 +106,7 @@ export async function onboardingRoutes(app: FastifyInstance): Promise<void> {
     p.set("values", parsed.data.values);
     p.set("onboarding.step", Math.max(p.onboarding?.step ?? 0, stepAfter("values")));
     await p.save();
+    resyncIfCompleted(p);
     return { ok: true, step: p.onboarding?.step };
   });
 
@@ -127,6 +117,7 @@ export async function onboardingRoutes(app: FastifyInstance): Promise<void> {
     p.set("interests", parsed.data.interests);
     p.set("onboarding.step", Math.max(p.onboarding?.step ?? 0, stepAfter("interests")));
     await p.save();
+    resyncIfCompleted(p);
     return { ok: true, step: p.onboarding?.step };
   });
 
@@ -144,6 +135,7 @@ export async function onboardingRoutes(app: FastifyInstance): Promise<void> {
     );
     p.set("onboarding.step", Math.max(p.onboarding?.step ?? 0, stepAfter("prompts")));
     await p.save();
+    resyncIfCompleted(p);
     return { ok: true, step: p.onboarding?.step };
   });
 
@@ -175,6 +167,7 @@ export async function onboardingRoutes(app: FastifyInstance): Promise<void> {
     p.set("voiceIntro", null);
     p.set("onboarding.step", Math.max(p.onboarding?.step ?? 0, stepAfter("voice")));
     await p.save();
+    resyncIfCompleted(p);
     return { ok: true, step: p.onboarding?.step };
   });
 
@@ -191,28 +184,11 @@ export async function onboardingRoutes(app: FastifyInstance): Promise<void> {
     if (!p.prompts?.length) missing.push("prompts");
     if (missing.length) return bad(reply, `Incomplete sections: ${missing.join(", ")}`);
 
-    const profileText = buildProfileText(p);
-    try {
-      await getVector().upsert({
-        id: `profile:${req.user.sub}`,
-        data: profileText,
-        metadata: {
-          userId: req.user.sub,
-          gender: p.basics?.gender ?? "",
-          interestedIn: p.basics?.interestedIn ?? [],
-          intent: p.intent ?? "",
-          city: p.basics?.city ?? "",
-        },
-      });
-      p.set("vectorSyncedAt", new Date());
-    } catch (err) {
-      req.log.warn({ err }, "vector upsert failed — completing anyway, resync later");
-    }
-
     p.set("onboarding.completed", true);
     p.set("onboarding.completedAt", new Date());
     p.set("onboarding.step", SECTION_ORDER.length);
     await p.save();
+    await syncProfileVector(p);
     return { ok: true, completed: true };
   });
 }
