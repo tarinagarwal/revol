@@ -7,12 +7,18 @@ type BlurImageProps = {
   alt: string;
   /** 0 = fully revealed, 1..3 = increasing mystery. THE core reveal mechanic. */
   blurLevel?: 0 | 1 | 2 | 3;
-  aspect?: "square" | "portrait" | "wide";
+  /** fill = stretch to the parent's height (fixed-rail layouts). */
+  aspect?: "square" | "portrait" | "wide" | "fill";
   className?: string;
 };
 
 const blurClasses = { 0: "blur-0 scale-100", 1: "blur-sm scale-105", 2: "blur-lg scale-110", 3: "blur-2xl scale-125" } as const;
-const aspectClasses = { square: "aspect-square", portrait: "aspect-[3/4]", wide: "aspect-video" } as const;
+const aspectClasses = {
+  square: "aspect-square",
+  portrait: "aspect-[3/4]",
+  wide: "aspect-video",
+  fill: "h-full w-full",
+} as const;
 
 /**
  * Progressive-reveal image — Revol's signature mechanic.

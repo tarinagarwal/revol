@@ -228,36 +228,26 @@ export function ProfileScreen() {
         </Stack>
       </div>
 
-      {/* Edit sheets — reusing the onboarding steps */}
-      <Sheet open={editing === "intent"} onClose={() => setEditing(null)}>
-        <Stack gap={4}>
-          <Heading level={4}>Your intention</Heading>
-          <IntentStep config={config} initial={p.intent} onSaved={closeAndRefresh} />
-        </Stack>
+      {/* Edit dialogs — reusing the onboarding steps */}
+      <Sheet open={editing === "intent"} onClose={() => setEditing(null)} title="Your intention">
+        <IntentStep config={config} initial={p.intent} onSaved={closeAndRefresh} />
       </Sheet>
-      <Sheet open={editing === "personality"} onClose={() => setEditing(null)} className="max-h-[85svh] overflow-y-auto">
-        <Stack gap={4}>
-          <Heading level={4}>How you move through the world</Heading>
-          <PersonalityStep config={config} initial={p.personality} onSaved={closeAndRefresh} />
-        </Stack>
+      <Sheet
+        open={editing === "personality"}
+        onClose={() => setEditing(null)}
+        title="How you move through the world"
+        className="sm:max-w-2xl"
+      >
+        <PersonalityStep config={config} initial={p.personality} onSaved={closeAndRefresh} />
       </Sheet>
-      <Sheet open={editing === "values"} onClose={() => setEditing(null)} className="max-h-[85svh] overflow-y-auto">
-        <Stack gap={4}>
-          <Heading level={4}>What you hold closest</Heading>
-          <ValuesStep config={config} initial={p.values} onSaved={closeAndRefresh} />
-        </Stack>
+      <Sheet open={editing === "values"} onClose={() => setEditing(null)} title="What you hold closest">
+        <ValuesStep config={config} initial={p.values} onSaved={closeAndRefresh} />
       </Sheet>
-      <Sheet open={editing === "interests"} onClose={() => setEditing(null)} className="max-h-[85svh] overflow-y-auto">
-        <Stack gap={4}>
-          <Heading level={4}>What lights you up</Heading>
-          <InterestsStep config={config} initial={p.interests} onSaved={closeAndRefresh} />
-        </Stack>
+      <Sheet open={editing === "interests"} onClose={() => setEditing(null)} title="What lights you up" className="sm:max-w-2xl">
+        <InterestsStep config={config} initial={p.interests} onSaved={closeAndRefresh} />
       </Sheet>
-      <Sheet open={editing === "prompts"} onClose={() => setEditing(null)} className="max-h-[85svh] overflow-y-auto">
-        <Stack gap={4}>
-          <Heading level={4}>In your own words</Heading>
-          <PromptsStep config={config} initial={p.prompts} onSaved={closeAndRefresh} />
-        </Stack>
+      <Sheet open={editing === "prompts"} onClose={() => setEditing(null)} title="In your own words" className="sm:max-w-2xl">
+        <PromptsStep config={config} initial={p.prompts} onSaved={closeAndRefresh} />
       </Sheet>
     </Page>
   );

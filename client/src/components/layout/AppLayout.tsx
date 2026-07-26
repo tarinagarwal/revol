@@ -30,9 +30,10 @@ export function AppLayout() {
   const user = useAuthStore((s) => s.user);
 
   return (
-    <div className="flex min-h-svh bg-black text-ivory">
+    // lg+: the shell owns the viewport so panes can pin and scroll independently.
+    <div className="flex min-h-svh bg-black text-ivory lg:h-svh lg:overflow-hidden">
       {/* Desktop sidebar */}
-      <aside className="sticky top-0 hidden h-svh w-60 shrink-0 flex-col border-r border-charcoal px-4 py-6 md:flex">
+      <aside className="hidden h-svh w-60 shrink-0 flex-col border-r border-charcoal px-4 py-6 lg:flex">
         <NavLink to="/app/today" className="mb-10 flex items-center gap-3 px-2 no-underline">
           <InfinityHeartIcon size={28} className="text-crimson" />
           <span className="font-display text-lg tracking-cinematic uppercase text-gold">revol</span>
@@ -78,9 +79,9 @@ export function AppLayout() {
       </aside>
 
       {/* Content */}
-      <div className="flex min-w-0 flex-1 flex-col">
+      <div className="flex min-w-0 flex-1 flex-col lg:h-svh lg:overflow-hidden">
         {/* Mobile top bar */}
-        <header className="sticky top-0 z-70 flex items-center justify-between border-b border-charcoal bg-black/90 px-5 py-3 backdrop-blur md:hidden pt-[max(0.75rem,env(safe-area-inset-top))]">
+        <header className="sticky top-0 z-70 flex items-center justify-between border-b border-charcoal bg-black/90 px-5 py-3 backdrop-blur lg:hidden pt-[max(0.75rem,env(safe-area-inset-top))]">
           <NavLink to="/app/today" className="flex items-center gap-2.5 no-underline">
             <InfinityHeartIcon size={24} className="text-crimson" />
             <span className="font-display text-base tracking-cinematic uppercase text-gold">revol</span>
@@ -90,7 +91,7 @@ export function AppLayout() {
           </NavLink>
         </header>
 
-        <main className="flex-1 pb-24 md:pb-0">
+        <main className="flex-1 pb-24 lg:min-h-0 lg:overflow-y-auto lg:pb-0">
           <Outlet />
         </main>
       </div>
@@ -98,7 +99,7 @@ export function AppLayout() {
       {/* Mobile bottom tabs */}
       <nav
         aria-label="Primary"
-        className="fixed bottom-0 left-0 right-0 z-80 border-t border-charcoal bg-black/95 backdrop-blur md:hidden pb-[env(safe-area-inset-bottom)]"
+        className="fixed bottom-0 left-0 right-0 z-80 border-t border-charcoal bg-black/95 backdrop-blur lg:hidden pb-[env(safe-area-inset-bottom)]"
       >
         <div className="mx-auto flex max-w-lg items-stretch justify-around">
           {items.map((item) => (

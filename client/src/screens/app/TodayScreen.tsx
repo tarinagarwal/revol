@@ -10,7 +10,6 @@ import {
   Divider,
   EmptyState,
   Heading,
-  Page,
   Reveal,
   Row,
   Spinner,
@@ -78,9 +77,10 @@ function MatchView({ match, onActed }: { match: MatchCard; onActed: (mutual: boo
     );
 
   return (
-    <Page width="full">
-      <Reveal>
-        <Stack gap={1} className="mb-6">
+    <div className="mx-auto flex w-full max-w-7xl flex-col px-4 py-5 sm:px-6 lg:h-full lg:px-8 lg:py-6">
+      {/* Header — never scrolls away */}
+      <Reveal className="shrink-0">
+        <Stack gap={1} className="mb-5">
           <Text variant="label" tone="gold">
             Today's introduction
           </Text>
@@ -96,41 +96,43 @@ function MatchView({ match, onActed }: { match: MatchCard; onActed: (mutual: boo
         </Stack>
       </Reveal>
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,360px)_1fr] lg:items-start">
-        {/* Left rail — the veiled person (sticky on desktop) */}
-        <Stack gap={5} className="lg:sticky lg:top-8">
-          <Reveal delay={100}>
-            <div className="relative">
-              {c.photoUrl ? (
-                <BlurImage src={c.photoUrl} alt="Your match, veiled" blurLevel={match.revealLevel} aspect="portrait" />
-              ) : (
-                <div className="flex aspect-[3/4] w-full flex-col items-center justify-center gap-3 rounded-2xl border border-charcoal bg-rich-black">
-                  <EyeOffIcon size={32} className="text-ivory-dim" />
-                  <Text variant="caption" tone="dim">
-                    No photo yet — pure mystery
-                  </Text>
-                </div>
-              )}
-              {match.revealLevel > 0 && (
-                <span className="absolute top-3 left-3 flex items-center gap-1.5 rounded-full border border-charcoal bg-black/70 px-3 py-1.5 backdrop-blur">
-                  <EyeOffIcon size={13} className="text-gold" />
-                  <span className="font-body text-[10px] tracking-elegant uppercase text-ivory-dim">Veiled</span>
-                </span>
-              )}
-            </div>
-          </Reveal>
+      <div className="grid min-h-0 flex-1 grid-cols-1 gap-6 lg:grid-cols-[minmax(0,340px)_1fr]">
+        {/* Left rail — pinned to the viewport, portrait flexes to fit */}
+        <div className="flex flex-col gap-4 lg:min-h-0">
+          <div className="relative min-h-0 lg:flex-1">
+            {c.photoUrl ? (
+              <BlurImage
+                src={c.photoUrl}
+                alt="Your match, veiled"
+                blurLevel={match.revealLevel}
+                aspect="portrait"
+                className="lg:h-full lg:w-full lg:aspect-auto"
+              />
+            ) : (
+              <div className="flex aspect-[3/4] w-full flex-col items-center justify-center gap-3 rounded-2xl border border-charcoal bg-rich-black lg:aspect-auto lg:h-full">
+                <EyeOffIcon size={32} className="text-ivory-dim" />
+                <Text variant="caption" tone="dim">
+                  No photo yet — pure mystery
+                </Text>
+              </div>
+            )}
+            {match.revealLevel > 0 && (
+              <span className="absolute top-3 left-3 flex items-center gap-1.5 rounded-full border border-charcoal bg-black/70 px-3 py-1.5 backdrop-blur">
+                <EyeOffIcon size={13} className="text-gold" />
+                <span className="font-body text-[10px] tracking-elegant uppercase text-ivory-dim">Veiled</span>
+              </span>
+            )}
+          </div>
           {c.voiceUrl && (
-            <Reveal delay={180}>
+            <div className="shrink-0">
               <VoicePlayer url={c.voiceUrl} title="Their voice" subtitle="Heard before seen" variant="gold" />
-            </Reveal>
+            </div>
           )}
-          <Reveal delay={240} className="hidden lg:block">
-            {actions}
-          </Reveal>
-        </Stack>
+          <div className="hidden shrink-0 lg:block">{actions}</div>
+        </div>
 
-        {/* Right rail — the substance */}
-        <Stack gap={5}>
+        {/* Right rail — the only thing that scrolls */}
+        <Stack gap={5} className="lg:min-h-0 lg:overflow-y-auto lg:pr-1 lg:pb-2">
           <Reveal delay={160}>
             <Card variant="gold">
               <Row gap={6}>
@@ -211,7 +213,7 @@ function MatchView({ match, onActed }: { match: MatchCard; onActed: (mutual: boo
           </Reveal>
         </Stack>
       </div>
-    </Page>
+    </div>
   );
 }
 
