@@ -10,6 +10,12 @@ const envSchema = z.object({
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
   PORT: z.coerce.number().default(8080),
 
+  /** true = dev conveniences ON (OTPs logged + returned in API responses). NEVER true in prod. */
+  DEV_MODE: z
+    .string()
+    .default("false")
+    .transform((v) => v === "true"),
+
   MONGODB_URI: z.string().optional(),
 
   JWT_ACCESS_SECRET: z.string().optional(),
@@ -28,6 +34,9 @@ const envSchema = z.object({
   QSTASH_NEXT_SIGNING_KEY: z.string().optional(),
 
   OPENROUTER_API_KEY: z.string().optional(),
+
+  GMAIL_USER: z.string().optional(),
+  GMAIL_APP_PASSWORD: z.string().optional(),
 
   GCP_PROJECT_ID: z.string().optional(),
   GCS_BUCKET: z.string().optional(),

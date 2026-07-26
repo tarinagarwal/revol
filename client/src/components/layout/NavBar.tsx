@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, NavLink } from "react-router-dom";
+import { Link, NavLink, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/cn";
 import { Button, Drawer, Stack, Divider } from "@/components/ui";
 import { InfinityHeartIcon, MenuIcon, CloseIcon } from "@/components/icons";
@@ -15,6 +15,7 @@ const links = [
  * hardens to solid black once scrolled. Mobile: drawer menu.
  */
 export function NavBar() {
+  const navigate = useNavigate();
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -55,7 +56,9 @@ export function NavBar() {
                 {l.label}
               </NavLink>
             ))}
-            <Button size="sm">Join Revol</Button>
+            <Button size="sm" onPress={() => void navigate("/auth/sign-up")}>
+              Join Revol
+            </Button>
           </div>
 
           <IconButton label="Open menu" className="ml-auto md:hidden" onPress={() => setMenuOpen(true)}>
@@ -88,7 +91,15 @@ export function NavBar() {
               {l.label}
             </NavLink>
           ))}
-          <Button fullWidth>Join Revol</Button>
+          <Button
+            fullWidth
+            onPress={() => {
+              setMenuOpen(false);
+              void navigate("/auth/sign-up");
+            }}
+          >
+            Join Revol
+          </Button>
         </Stack>
       </Drawer>
     </>
