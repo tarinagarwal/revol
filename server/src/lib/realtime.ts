@@ -13,7 +13,8 @@ export type RealtimeEvent =
   | { type: "typing"; matchId: string; userId: string }
   | { type: "read"; matchId: string; userId: string; at: string }
   | { type: "reveal"; matchId: string; revealLevel: number }
-  | { type: "match"; matchId: string };
+  | { type: "match"; matchId: string }
+  | { type: "notification"; notification: Record<string, unknown> };
 
 /** Envelope: which users should receive the event. */
 type Envelope = { recipients: string[]; event: RealtimeEvent };

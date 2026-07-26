@@ -6,6 +6,7 @@ import { User } from "../../db/models/User.js";
 import { Media } from "../../db/models/Media.js";
 import { Preferences, getOrCreatePreferences, type PreferencesDoc } from "../../db/models/Preferences.js";
 import { blockedUserIds } from "../../db/models/Block.js";
+import { notify } from "../notifications/notifications.service.js";
 import { getVector } from "../../lib/upstash.js";
 import { signedReadUrl } from "../../lib/storage/gcs.js";
 import { compatibilityReport } from "../ai/ai.service.js";
@@ -268,6 +269,15 @@ export async function actOnToday(userId: string, action: "like" | "pass") {
           revealLevel: 2, // mutuality lifts the first veil
           compatibility: match.compatibility,
         }));
+
+      // Both sides hear about it (Epic 12).
+      await notify([userId, candidateId], {
+        type: "match",
+        title: "It's mutual",
+        body: match.compatibility?.vibe ?? "Someone reached back. The conversation is open.",
+        link: `/app/matches/${String(mutual._id)}`,
+      });
+
       return { status: match.status, mutual: true, matchId: String(mutual._id) };
     }
   }

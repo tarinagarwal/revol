@@ -7,7 +7,8 @@ export type RealtimeEvent =
   | { type: "message"; matchId: string; message: Record<string, unknown> }
   | { type: "typing"; matchId: string; userId: string }
   | { type: "read"; matchId: string; userId: string; at: string }
-  | { type: "reveal"; matchId: string; revealLevel: number };
+  | { type: "reveal"; matchId: string; revealLevel: number }
+  | { type: "notification"; notification: { title: string; body: string; link: string } };
 
 /**
  * ONE shared SSE connection per app instance, however many components listen.
@@ -39,7 +40,7 @@ function connect(token: string) {
   es.onopen = () => setConnected(true);
   es.onerror = () => setConnected(false); // EventSource retries on its own
 
-  for (const type of ["message", "typing", "read", "reveal"] as const) {
+  for (const type of ["message", "typing", "read", "reveal", "notification"] as const) {
     es.addEventListener(type, (e) => {
       try {
         const parsed = JSON.parse((e as MessageEvent).data) as RealtimeEvent;

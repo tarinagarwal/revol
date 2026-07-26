@@ -33,6 +33,35 @@ export const PROMPTS = [
   { id: "kind-of-love", question: "The kind of love I'm looking for..." },
 ] as const;
 
+export const EDUCATION = [
+  { id: "high-school", label: "High school" },
+  { id: "in-college", label: "In college" },
+  { id: "undergraduate", label: "Undergraduate" },
+  { id: "postgraduate", label: "Postgraduate" },
+  { id: "doctorate", label: "Doctorate" },
+  { id: "self-taught", label: "Self-taught" },
+] as const;
+
+export const HABITS = [
+  { id: "never", label: "Never" },
+  { id: "socially", label: "Socially" },
+  { id: "regularly", label: "Regularly" },
+] as const;
+
+export const KIDS = [
+  { id: "want-someday", label: "Want someday" },
+  { id: "dont-want", label: "Don't want" },
+  { id: "have-and-want-more", label: "Have and want more" },
+  { id: "have-and-done", label: "Have and complete" },
+  { id: "unsure", label: "Still figuring it out" },
+] as const;
+
+export const LANGUAGES = [
+  "English", "Hindi", "Bengali", "Marathi", "Telugu", "Tamil",
+  "Gujarati", "Kannada", "Malayalam", "Punjabi", "Urdu", "Odia",
+  "Assamese", "Spanish", "French", "German", "Arabic", "Mandarin",
+] as const;
+
 export const GENDERS = ["woman", "man", "nonbinary", "other"] as const;
 export const INTERESTED_IN = ["women", "men", "nonbinary", "everyone"] as const;
 export const INTENTS = [
@@ -50,10 +79,16 @@ export const ONBOARDING_CONFIG = {
   genders: GENDERS,
   interestedIn: INTERESTED_IN,
   intents: INTENTS,
+  education: EDUCATION,
+  habits: HABITS,
+  kids: KIDS,
+  languages: LANGUAGES,
   rules: {
     minAge: 18,
     values: { min: 3, max: 5 },
     interests: { min: 3, max: 8 },
     prompts: { min: 2, max: 3, maxAnswerLength: 240 },
+    photos: { min: 1, max: 6 },
+    languages: { max: 5 },
   },
 };

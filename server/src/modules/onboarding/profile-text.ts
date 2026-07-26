@@ -13,8 +13,23 @@ export function buildProfileText(p: InstanceType<typeof Profile>): string {
   }).join(" ");
   const prompts = (p.prompts ?? []).map((pr) => `${pr.question} ${pr.answer}`).join(" ");
   const intentLabel = INTENTS.find((i) => i.id === p.intent)?.label ?? p.intent ?? "";
+  const l = p.lifestyle;
+  const lifestyle = l
+    ? [
+        l.work ? `works in ${l.work}` : "",
+        l.education ? `education: ${l.education}` : "",
+        l.drinking ? `drinks ${l.drinking}` : "",
+        l.smoking ? `smokes ${l.smoking}` : "",
+        l.kids ? `on children: ${l.kids}` : "",
+        l.languages?.length ? `speaks ${l.languages.join(", ")}` : "",
+      ]
+        .filter(Boolean)
+        .join("; ")
+    : "";
+
   return [
     `Intent: ${intentLabel}.`,
+    lifestyle ? `Lifestyle: ${lifestyle}.` : "",
     `Values: ${(p.values ?? []).join(", ")}.`,
     `Interests: ${(p.interests ?? []).join(", ")}.`,
     `Personality: ${persona}`,

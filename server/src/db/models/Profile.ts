@@ -51,6 +51,31 @@ const profileSchema = new Schema(
       default: null,
     },
 
+    /** Lifestyle context — optional, but real matching signal. */
+    lifestyle: {
+      type: new Schema(
+        {
+          heightCm: { type: Number, default: null, min: 120, max: 230 },
+          work: { type: String, default: "", trim: true, maxlength: 80 },
+          education: {
+            type: String,
+            enum: ["high-school", "in-college", "undergraduate", "postgraduate", "doctorate", "self-taught", ""],
+            default: "",
+          },
+          drinking: { type: String, enum: ["never", "socially", "regularly", ""], default: "" },
+          smoking: { type: String, enum: ["never", "socially", "regularly", ""], default: "" },
+          kids: {
+            type: String,
+            enum: ["want-someday", "dont-want", "have-and-want-more", "have-and-done", "unsure", ""],
+            default: "",
+          },
+          languages: { type: [String], default: [] },
+        },
+        { _id: false },
+      ),
+      default: null,
+    },
+
     /** questionId → 1..5 */
     personality: { type: Map, of: Number, default: undefined },
 

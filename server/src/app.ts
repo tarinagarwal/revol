@@ -17,6 +17,8 @@ import { chatRoutes } from "./modules/chat/chat.routes.js";
 import { safetyRoutes } from "./modules/safety/safety.routes.js";
 import { verificationRoutes } from "./modules/verification/verification.routes.js";
 import { privacyRoutes } from "./modules/privacy/privacy.routes.js";
+import { communityRoutes } from "./modules/community/community.routes.js";
+import { notificationRoutes } from "./modules/notifications/notifications.routes.js";
 import "./modules/ai/ai.jobs.js"; // registers job handlers (side effect)
 import "./modules/discovery/discovery.jobs.js"; // daily-matches cron handler
 import "./modules/chat/chat.jobs.js"; // reveal + voice-note handlers
@@ -35,6 +37,19 @@ export async function buildApp(): Promise<FastifyInstance> {
     methods: ["GET", "HEAD", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
   });
 
+  // Clients routinely send `Content-Type: application/json` with no body on
+  // DELETE/POST actions. Fastify rejects that with 400 by default; treat an
+  // empty body as `{}` so a header quirk never breaks a valid request.
+  app.addContentTypeParser("application/json", { parseAs: "string" }, (_req, body: string, done) => {
+    if (!body || body.trim() === "") return done(null, {});
+    try {
+      done(null, JSON.parse(body) as unknown);
+    } catch (err) {
+      (err as Error & { statusCode?: number }).statusCode = 400;
+      done(err as Error, undefined);
+    }
+  });
+
   await app.register(authPlugin);
   await app.register(multipart, { limits: { fileSize: 15 * 1024 * 1024, files: 1 } });
 
@@ -51,6 +66,8 @@ export async function buildApp(): Promise<FastifyInstance> {
   await app.register(safetyRoutes);
   await app.register(verificationRoutes);
   await app.register(privacyRoutes);
+  await app.register(communityRoutes);
+  await app.register(notificationRoutes);
   await app.register(aiRoutes);
   await app.register(jobRoutes);
 

@@ -1,10 +1,11 @@
 import { useNavigate } from "react-router-dom";
-import { Button, Card, Divider, Page, PageHeader, Row, Stack, Text, toast } from "@/components/ui";
-import { LockIcon } from "@/components/icons";
+import { Button, Card, Page, PageHeader, Row, Stack, Text, toast } from "@/components/ui";
+import { LockIcon, UserIcon } from "@/components/icons";
 import { useAuthStore } from "@/store/authStore";
 import { logoutRequest } from "@/features/auth/auth.api";
 import { PreferencesCard } from "@/features/preferences/PreferencesCard";
 import { PrivacyCard } from "@/features/privacy/PrivacyCard";
+import { NotificationPrefsCard } from "@/features/notifications/NotificationPrefsCard";
 
 /** /app/settings — discovery preferences, privacy controls, blocks, account. */
 export function SettingsScreen() {
@@ -18,42 +19,44 @@ export function SettingsScreen() {
   };
 
   return (
-    <Page width="narrow">
-      <PageHeader eyebrow="Account" title="Settings" />
-      <Stack gap={6}>
-      <PreferencesCard />
-      <PrivacyCard />
-      <Card padded={false} className="px-5 py-2 sm:px-6">
-        <Stack gap={0}>
-          <Row gap={3} className="py-3">
-            <Stack gap={1} className="flex-1">
-              <Text variant="label" tone="dim">
-                Account
-              </Text>
-              <Text variant="body">{user?.email}</Text>
-            </Stack>
-          </Row>
-          <Divider />
-          <Row gap={3} className="py-3">
-            <LockIcon size={18} className="text-gold" />
-            <Stack gap={1} className="flex-1">
-              <Text variant="body">Your data stays yours</Text>
-              <Text variant="caption" tone="dim">
-                Photos are private and signed per view. Nothing is shown before chemistry earns it.
-              </Text>
-            </Stack>
-          </Row>
+    <Page width="full">
+      <PageHeader eyebrow="Account" title="Settings" subtitle={user?.email ?? ""} />
+
+      {/* Two independent columns on desktop; single stack on mobile. */}
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-2 lg:items-start">
+        <Stack gap={5}>
+          <PreferencesCard />
+          <NotificationPrefsCard />
         </Stack>
-      </Card>
 
-      <Button variant="outline" fullWidth onPress={() => void signOut()}>
-        Sign out
-      </Button>
+        <Stack gap={5}>
+          <PrivacyCard />
 
-      <Text variant="caption" tone="dim" className="text-center">
-        Revol {__APP_VERSION__} · Chemistry before clarity
-      </Text>
-      </Stack>
+          <Card>
+            <Stack gap={4}>
+              <Row gap={3}>
+                <UserIcon size={18} className="text-gold" />
+                <Text variant="label" tone="gold" className="flex-1">
+                  Session
+                </Text>
+              </Row>
+              <Row gap={3}>
+                <LockIcon size={16} className="shrink-0 text-ivory-dim" />
+                <Text variant="caption" tone="dim" className="flex-1">
+                  Signed in as {user?.email}
+                </Text>
+              </Row>
+              <Button variant="outline" fullWidth onPress={() => void signOut()}>
+                Sign out
+              </Button>
+            </Stack>
+          </Card>
+
+          <Text variant="caption" tone="dim" className="text-center">
+            Revol {__APP_VERSION__} · Chemistry before clarity
+          </Text>
+        </Stack>
+      </div>
     </Page>
   );
 }

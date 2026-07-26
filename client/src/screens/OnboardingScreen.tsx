@@ -11,6 +11,8 @@ import { PersonalityStep } from "@/features/onboarding/steps/PersonalityStep";
 import { ValuesStep } from "@/features/onboarding/steps/ValuesStep";
 import { InterestsStep } from "@/features/onboarding/steps/InterestsStep";
 import { PromptsStep } from "@/features/onboarding/steps/PromptsStep";
+import { PhotosStep } from "@/features/onboarding/steps/PhotosStep";
+import { LifestyleStep } from "@/features/onboarding/steps/LifestyleStep";
 import { VoiceStep } from "@/features/onboarding/steps/VoiceStep";
 import { useAuthStore } from "@/store/authStore";
 import { ApiError } from "@/lib/api";
@@ -18,11 +20,13 @@ import { ApiError } from "@/lib/api";
 const STEP_TITLES = [
   { title: "Welcome", subtitle: "" },
   { title: "The essentials", subtitle: "A few facts — nothing that gives the mystery away." },
+  { title: "Your world", subtitle: "Context that helps us find people who actually fit." },
   { title: "Your intention", subtitle: "What are you really here for?" },
   { title: "How you move through the world", subtitle: "Slide toward whichever feels like you." },
   { title: "What you hold closest", subtitle: "Choose 3 to 5 values that define you." },
   { title: "What lights you up", subtitle: "Pick 3 to 8 — the things you could talk about forever." },
   { title: "In your own words", subtitle: "Answer at least two. Make them count." },
+  { title: "Your photos", subtitle: "Kept blurred until chemistry earns the reveal." },
   { title: "Your voice", subtitle: "A 60-second intro. Heard before seen — optional, but powerful." },
 ];
 
@@ -146,12 +150,14 @@ export function OnboardingScreen() {
           )}
 
           {step === 1 && <BasicsStep config={config} initial={sections.basics} onSaved={advance} />}
-          {step === 2 && <IntentStep config={config} initial={sections.intent} onSaved={advance} />}
-          {step === 3 && <PersonalityStep config={config} initial={sections.personality} onSaved={advance} />}
-          {step === 4 && <ValuesStep config={config} initial={sections.values} onSaved={advance} />}
-          {step === 5 && <InterestsStep config={config} initial={sections.interests} onSaved={advance} />}
-          {step === 6 && <PromptsStep config={config} initial={sections.prompts} onSaved={advance} />}
-          {step === 7 && (
+          {step === 2 && <LifestyleStep config={config} initial={sections.lifestyle} onSaved={advance} />}
+          {step === 3 && <IntentStep config={config} initial={sections.intent} onSaved={advance} />}
+          {step === 4 && <PersonalityStep config={config} initial={sections.personality} onSaved={advance} />}
+          {step === 5 && <ValuesStep config={config} initial={sections.values} onSaved={advance} />}
+          {step === 6 && <InterestsStep config={config} initial={sections.interests} onSaved={advance} />}
+          {step === 7 && <PromptsStep config={config} initial={sections.prompts} onSaved={advance} />}
+          {step === 8 && <PhotosStep photoCount={sections.photoCount} onSaved={advance} />}
+          {step === 9 && (
             <VoiceStep initial={sections.voiceIntro} onDone={() => void finish()} finishing={finishing} />
           )}
         </Stack>

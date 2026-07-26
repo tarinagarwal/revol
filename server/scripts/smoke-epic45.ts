@@ -110,6 +110,20 @@ async function main() {
       { promptId: "perfect-sunday", answer: "Second coffee, a paperback, and golden-hour walks with no destination." },
     ],
   });
+  // Onboarding now requires at least one photo — give the fixture one.
+  const buddyPhotos = await fetch(`${BASE}/media/photos`, { headers: { Authorization: `Bearer ${buddyToken}` } });
+  const buddyPhotoCount = ((await buddyPhotos.json()) as { photos: unknown[] }).photos.length;
+  if (buddyPhotoCount === 0) {
+    const buddyImg = await fetch("https://picsum.photos/seed/revolbuddy/400/500");
+    const buddyForm = new FormData();
+    buddyForm.append("file", await buddyImg.blob(), "buddy.jpg");
+    await fetch(`${BASE}/media/photos`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${buddyToken}` },
+      body: buddyForm,
+    });
+  }
+
   const buddyComplete = await fetch(`${BASE}/onboarding/complete`, { method: "POST", headers: { Authorization: `Bearer ${buddyToken}` } });
   record("buddy profile complete", buddyComplete.ok, `status ${buddyComplete.status}`);
 

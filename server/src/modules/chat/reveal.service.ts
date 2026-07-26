@@ -8,6 +8,7 @@ import {
   type ConversationQuality,
 } from "../../ai/prompts/conversation.js";
 import { publish } from "../../lib/realtime.js";
+import { notify } from "../notifications/notifications.service.js";
 
 /**
  * The reveal engine (Epic 7's unlock rules, powered by Epic 8's messages).
@@ -92,6 +93,12 @@ export async function evaluateReveal(matchId: string): Promise<{ revealLevel: nu
   await match.save();
 
   publish(match.users.map(String), { type: "reveal", matchId, revealLevel: next });
+  await notify(match.users.map(String), {
+    type: "reveal",
+    title: next === 0 ? "The blur has lifted" : "The veil just thinned",
+    body: next === 0 ? "You can see each other now." : "Keep going — something is building.",
+    link: `/app/matches/${matchId}`,
+  });
   await Message.create({
     matchId,
     senderId: userA, // system messages carry a sender for schema simplicity

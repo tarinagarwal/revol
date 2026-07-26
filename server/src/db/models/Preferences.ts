@@ -21,6 +21,20 @@ const preferencesSchema = new Schema(
     /** Pauses the daily introduction without deleting anything. */
     paused: { type: Boolean, default: false },
 
+    /** Per-type notification switches (Epic 12). */
+    notifications: {
+      type: new Schema(
+        {
+          matches: { type: Boolean, default: true },
+          messages: { type: Boolean, default: true },
+          reveals: { type: Boolean, default: true },
+          events: { type: Boolean, default: true },
+        },
+        { _id: false },
+      ),
+      default: () => ({}),
+    },
+
     /** Data visibility (Epic 9). */
     privacy: {
       type: new Schema(

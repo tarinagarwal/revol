@@ -1,16 +1,22 @@
 import { NavLink, Outlet } from "react-router-dom";
 import { cn } from "@/lib/cn";
 import { Avatar, Text } from "@/components/ui";
+import { useEffect, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   InfinityHeartIcon,
   SparkIcon,
   HeartIcon,
   ChatIcon,
   UserIcon,
+  UsersIcon,
   SettingsIcon,
   type IconProps,
 } from "@/components/icons";
 import { useAuthStore } from "@/store/authStore";
+import { NotificationBell, NotificationCenter } from "@/features/notifications/NotificationCenter";
+import { usePush, showDesktopNotification } from "@/features/notifications/usePush";
+import { useRealtime } from "@/features/chat/useRealtime";
 
 type NavItem = { path: string; label: string; icon: (p: IconProps) => React.ReactNode };
 
@@ -18,6 +24,7 @@ const items: NavItem[] = [
   { path: "/app/today", label: "Today", icon: SparkIcon },
   { path: "/app/matches", label: "Matches", icon: HeartIcon },
   { path: "/app/chat", label: "Chat", icon: ChatIcon },
+  { path: "/app/communities", label: "Community", icon: UsersIcon },
   { path: "/app/profile", label: "You", icon: UserIcon },
 ];
 
@@ -28,6 +35,29 @@ const items: NavItem[] = [
  */
 export function AppLayout() {
   const user = useAuthStore((s) => s.user);
+  const queryClient = useQueryClient();
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
+
+  usePush();
+
+  // Live notifications for the whole app section (shared SSE connection).
+  useRealtime((event) => {
+    if (event.type === "notification") {
+      void queryClient.invalidateQueries({ queryKey: ["notifications"] });
+      showDesktopNotification(event.notification.title, event.notification.body);
+    }
+  });
+
+  // Refresh the badge when returning to the app.
+  useEffect(() => {
+    const onVisible = () => {
+      if (document.visibilityState === "visible") {
+        void queryClient.invalidateQueries({ queryKey: ["notifications"] });
+      }
+    };
+    document.addEventListener("visibilitychange", onVisible);
+    return () => document.removeEventListener("visibilitychange", onVisible);
+  }, [queryClient]);
 
   return (
     // lg+: the shell owns the viewport so panes can pin and scroll independently.
@@ -38,6 +68,9 @@ export function AppLayout() {
           <InfinityHeartIcon size={28} className="text-crimson" />
           <span className="font-display text-lg tracking-cinematic uppercase text-gold">revol</span>
         </NavLink>
+        <div className="mb-4 flex justify-end">
+          <NotificationBell onOpen={() => setNotificationsOpen(true)} />
+        </div>
         <nav aria-label="App" className="flex flex-col gap-1">
           {items.map((item) => (
             <NavLink
@@ -86,9 +119,16 @@ export function AppLayout() {
             <InfinityHeartIcon size={24} className="text-crimson" />
             <span className="font-display text-base tracking-cinematic uppercase text-gold">revol</span>
           </NavLink>
-          <NavLink to="/app/settings" aria-label="Settings" className="text-ivory-dim transition-colors duration-base hover:text-ivory">
-            <SettingsIcon size={22} />
-          </NavLink>
+          <div className="flex items-center gap-1">
+            <NotificationBell onOpen={() => setNotificationsOpen(true)} />
+            <NavLink
+              to="/app/settings"
+              aria-label="Settings"
+              className="p-2 text-ivory-dim transition-colors duration-base hover:text-ivory"
+            >
+              <SettingsIcon size={20} />
+            </NavLink>
+          </div>
         </header>
 
         <main className="flex-1 pb-24 lg:min-h-0 lg:overflow-y-auto lg:pb-0">
@@ -120,6 +160,8 @@ export function AppLayout() {
           ))}
         </div>
       </nav>
+
+      <NotificationCenter open={notificationsOpen} onOpenChange={setNotificationsOpen} />
     </div>
   );
 }

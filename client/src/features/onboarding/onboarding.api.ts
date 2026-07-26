@@ -9,12 +9,28 @@ export type OnboardingConfig = {
   genders: string[];
   interestedIn: string[];
   intents: { id: string; label: string; description: string }[];
+  education: { id: string; label: string }[];
+  habits: { id: string; label: string }[];
+  kids: { id: string; label: string }[];
+  languages: string[];
   rules: {
     minAge: number;
     values: { min: number; max: number };
     interests: { min: number; max: number };
     prompts: { min: number; max: number; maxAnswerLength: number };
+    photos: { min: number; max: number };
+    languages: { max: number };
   };
+};
+
+export type LifestyleInput = {
+  heightCm: number | null;
+  work: string;
+  education: string;
+  drinking: string;
+  smoking: string;
+  kids: string;
+  languages: string[];
 };
 
 export type OnboardingState = {
@@ -22,6 +38,8 @@ export type OnboardingState = {
   completed: boolean;
   sections: {
     basics: { birthdate: string; gender: string; interestedIn: string[]; city: string } | null;
+    lifestyle: Partial<LifestyleInput> | null;
+    photoCount: number;
     intent: string | null;
     personality: Record<string, number> | null;
     values: string[] | null;
@@ -40,6 +58,8 @@ const put = (section: string, body: unknown) =>
 export const saveBasics = (b: { birthdate: string; gender: string; interestedIn: string[]; city: string }) =>
   put("basics", b);
 export const saveIntent = (intent: string) => put("intent", { intent });
+export const saveLifestyle = (l: LifestyleInput) => put("lifestyle", l);
+export const finishPhotos = () => api<{ ok: boolean; step: number }>("/onboarding/photos-done", { method: "POST" });
 export const savePersonality = (answers: Record<string, number>) => put("personality", { answers });
 export const saveValues = (values: string[]) => put("values", { values });
 export const saveInterests = (interests: string[]) => put("interests", { interests });

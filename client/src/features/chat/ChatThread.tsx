@@ -133,7 +133,7 @@ export function ChatThread({ matchId, conversation, onBack }: Props) {
 
   // Live updates for this thread.
   useRealtime((event) => {
-    if (event.matchId !== matchId) return;
+    if (event.type === "notification" || event.matchId !== matchId) return;
     if (event.type === "typing") {
       setPeerTyping(true);
       setTimeout(() => setPeerTyping(false), 3000);

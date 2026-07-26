@@ -4,17 +4,32 @@ import { uploadMedia, deleteMedia, signedReadUrl, validateMedia } from "../../li
 import { enqueueJob } from "../../lib/jobs.js";
 import { syncProfileVector } from "./vector-sync.js";
 import { ONBOARDING_CONFIG, PROMPTS } from "./onboarding.data.js";
+import { Media } from "../../db/models/Media.js";
 import {
   basicsSchema,
   intentSchema,
   interestsSchema,
+  lifestyleSchema,
   personalitySchema,
   promptsSchema,
   valuesSchema,
 } from "./onboarding.schemas.js";
 
-/** Section order drives step math. Voice is optional (step still advances). */
-const SECTION_ORDER = ["basics", "intent", "personality", "values", "interests", "prompts", "voice"] as const;
+/**
+ * Section order drives step math. Depth first, appearance last — photos sit
+ * near the end deliberately. Voice is optional (the step still advances).
+ */
+const SECTION_ORDER = [
+  "basics",
+  "lifestyle",
+  "intent",
+  "personality",
+  "values",
+  "interests",
+  "prompts",
+  "photos",
+  "voice",
+] as const;
 
 function stepAfter(section: (typeof SECTION_ORDER)[number]): number {
   return SECTION_ORDER.indexOf(section) + 1;
@@ -47,6 +62,8 @@ export async function onboardingRoutes(app: FastifyInstance): Promise<void> {
       completed: p.onboarding?.completed ?? false,
       sections: {
         basics: p.basics,
+        lifestyle: p.lifestyle,
+        photoCount: await Media.countDocuments({ userId: req.user.sub, kind: "photo", status: "active" }),
         intent: p.intent,
         personality: p.personality ? Object.fromEntries(p.personality) : null,
         values: p.values ?? null,
@@ -74,6 +91,27 @@ export async function onboardingRoutes(app: FastifyInstance): Promise<void> {
     p.set("onboarding.step", Math.max(p.onboarding?.step ?? 0, stepAfter("basics")));
     await p.save();
     resyncIfCompleted(p);
+    return { ok: true, step: p.onboarding?.step };
+  });
+
+  app.put("/onboarding/lifestyle", async (req, reply) => {
+    const parsed = lifestyleSchema.safeParse(req.body);
+    if (!parsed.success) return bad(reply, parsed.error.issues[0]?.message ?? "Invalid input");
+    const p = await getOrCreateProfile(req.user.sub);
+    p.set("lifestyle", { ...(p.lifestyle ?? {}), ...parsed.data });
+    p.set("onboarding.step", Math.max(p.onboarding?.step ?? 0, stepAfter("lifestyle")));
+    await p.save();
+    resyncIfCompleted(p);
+    return { ok: true, step: p.onboarding?.step };
+  });
+
+  /** Photos live in the media module; this only advances the wizard. */
+  app.post("/onboarding/photos-done", async (req, reply) => {
+    const count = await Media.countDocuments({ userId: req.user.sub, kind: "photo", status: "active" });
+    if (count < 1) return bad(reply, "Add at least one photo");
+    const p = await getOrCreateProfile(req.user.sub);
+    p.set("onboarding.step", Math.max(p.onboarding?.step ?? 0, stepAfter("photos")));
+    await p.save();
     return { ok: true, step: p.onboarding?.step };
   });
 
@@ -182,6 +220,8 @@ export async function onboardingRoutes(app: FastifyInstance): Promise<void> {
     if (!p.values?.length) missing.push("values");
     if (!p.interests?.length) missing.push("interests");
     if (!p.prompts?.length) missing.push("prompts");
+    const photoCount = await Media.countDocuments({ userId: req.user.sub, kind: "photo", status: "active" });
+    if (photoCount < 1) missing.push("photos");
     if (missing.length) return bad(reply, `Incomplete sections: ${missing.join(", ")}`);
 
     p.set("onboarding.completed", true);

@@ -32,6 +32,16 @@ export const interestsSchema = z.object({
   interests: z.array(z.enum(INTERESTS as unknown as [string, ...string[]])).min(3).max(8),
 });
 
+export const lifestyleSchema = z.object({
+  heightCm: z.number().int().min(120).max(230).nullable().optional(),
+  work: z.string().trim().max(80).optional(),
+  education: z.enum(["high-school", "in-college", "undergraduate", "postgraduate", "doctorate", "self-taught", ""]).optional(),
+  drinking: z.enum(["never", "socially", "regularly", ""]).optional(),
+  smoking: z.enum(["never", "socially", "regularly", ""]).optional(),
+  kids: z.enum(["want-someday", "dont-want", "have-and-want-more", "have-and-done", "unsure", ""]).optional(),
+  languages: z.array(z.string().max(30)).max(5).optional(),
+});
+
 export const promptsSchema = z.object({
   prompts: z
     .array(

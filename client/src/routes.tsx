@@ -17,6 +17,8 @@ import { ProfileScreen } from "@/screens/app/ProfileScreen";
 import { PhotosScreen } from "@/screens/app/PhotosScreen";
 import { SettingsScreen } from "@/screens/app/SettingsScreen";
 import { VerificationScreen } from "@/screens/app/VerificationScreen";
+import { CommunitiesScreen } from "@/screens/app/CommunitiesScreen";
+import { CommunityDetailScreen } from "@/screens/app/CommunityDetailScreen";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { RequireAuth, RedirectIfAuth, ProtectedOutlet } from "@/features/auth/guards";
 
@@ -53,6 +55,8 @@ export function AppRoutes() {
           <Route path="/app/photos" element={<PhotosScreen />} />
           <Route path="/app/settings" element={<SettingsScreen />} />
           <Route path="/app/verify" element={<VerificationScreen />} />
+          <Route path="/app/communities" element={<CommunitiesScreen />} />
+          <Route path="/app/communities/:id" element={<CommunityDetailScreen />} />
         </Route>
       </Route>
 

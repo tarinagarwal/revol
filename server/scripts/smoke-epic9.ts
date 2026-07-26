@@ -10,6 +10,7 @@ import { Media } from "../src/db/models/Media.js";
 import { Profile } from "../src/db/models/Profile.js";
 import { Report } from "../src/db/models/Report.js";
 import { User } from "../src/db/models/User.js";
+import { Verification } from "../src/db/models/Verification.js";
 
 const BASE = process.env.SMOKE_BASE ?? "http://localhost:8080";
 const results: { name: string; ok: boolean; detail: string }[] = [];
@@ -77,6 +78,10 @@ async function main() {
   const idB = String(userB?._id);
 
   /* ---------- verification ---------- */
+  // Reset the attempt counter so the suite is repeatable — the 5-attempt cap
+  // is real and would otherwise block reruns.
+  await Verification.updateOne({ userId: idA }, { attempts: 0, status: "unverified", reason: null });
+
   const vStatus = await fetch(`${BASE}/verification/status`, { headers: H(A) });
   const vBody = (await vStatus.json()) as { status: string; attemptsLeft: number };
   rec("verification status", vStatus.ok && !!vBody.status, `${vBody.status}, ${vBody.attemptsLeft} attempts left`);

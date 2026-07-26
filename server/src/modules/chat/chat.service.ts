@@ -7,6 +7,7 @@ import { publish } from "../../lib/realtime.js";
 import { signedReadUrl, uploadMedia, validateMedia } from "../../lib/storage/gcs.js";
 import { enqueueJob } from "../../lib/jobs.js";
 import { icebreakers, moderateMessage } from "../ai/ai.service.js";
+import { notify } from "../notifications/notifications.service.js";
 import { evaluateReveal } from "./reveal.service.js";
 
 export class ChatError extends Error {
@@ -64,6 +65,19 @@ async function afterSend(match: InstanceType<typeof Match>, message: InstanceTyp
     // `mine` is resolved per-recipient on the client using senderId.
     message: { ...dto, senderId: String(message.senderId) },
   });
+
+  // Tell the recipient, unless they're the sender (Epic 12).
+  const sender = await User.findById(message.senderId);
+  const revealed = (match.revealLevel ?? 2) === 0;
+  await notify(
+    match.users.map(String).filter((u) => u !== String(message.senderId)),
+    {
+      type: "message",
+      title: revealed ? (sender?.displayName ?? "New message") : "A new message",
+      body: message.kind === "voice" ? "Sent you a voice note" : message.body.slice(0, 120),
+      link: `/app/chat/${String(match._id)}`,
+    },
+  );
 
   // Reveal re-evaluation is async — never blocks sending.
   void enqueueJob("evaluate-reveal", { matchId: String(match._id) }).catch(() => undefined);
