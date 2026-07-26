@@ -87,6 +87,15 @@ async function main() {
   const convoBody = (await convos.json()) as { conversations: { matchId: string }[] };
   rec("conversation list", convos.ok && convoBody.conversations.length > 0, `${convoBody.conversations.length} conversation(s)`);
 
+  // Browsers enforce CORS on EventSource; server-side fetch does not. Assert
+  // the header explicitly — its absence silently breaks chat in the browser.
+  const corsProbe = await fetch(`${BASE}/chat/stream?token=${encodeURIComponent(A)}`, {
+    headers: { Origin: "https://revol-dating.vercel.app", Accept: "text/event-stream" },
+  });
+  const acao = corsProbe.headers.get("access-control-allow-origin");
+  rec("SSE sends CORS headers (browser-usable)", acao === "https://revol-dating.vercel.app", `ACAO: ${acao ?? "MISSING"}`);
+  await corsProbe.body?.cancel();
+
   // SSE: open a stream for B, then have A send — B must receive it live.
   const received: string[] = [];
   const controller = new AbortController();

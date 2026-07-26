@@ -31,11 +31,23 @@ export async function chatRoutes(app: FastifyInstance): Promise<void> {
       return reply.status(401).send({ error: "Invalid token" });
     }
 
+    // Writing to reply.raw bypasses Fastify's onSend hooks, so @fastify/cors
+    // never adds its headers — browsers would silently drop the stream.
+    // hijack() takes ownership of the socket; CORS is set by hand.
+    reply.hijack();
+    const origin = req.headers.origin;
     reply.raw.writeHead(200, {
       "Content-Type": "text/event-stream",
       "Cache-Control": "no-cache, no-transform",
       Connection: "keep-alive",
       "X-Accel-Buffering": "no",
+      ...(origin
+        ? {
+            "Access-Control-Allow-Origin": origin,
+            "Access-Control-Allow-Credentials": "true",
+            Vary: "Origin",
+          }
+        : {}),
     });
     reply.raw.write(`event: ready\ndata: {"ok":true}\n\n`);
 
@@ -50,9 +62,8 @@ export async function chatRoutes(app: FastifyInstance): Promise<void> {
     req.raw.on("close", () => {
       clearInterval(ping);
       unsubscribe();
+      reply.raw.end();
     });
-
-    return reply;
   });
 
   /* ---------- authenticated REST ---------- */

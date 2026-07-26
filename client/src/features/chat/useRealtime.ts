@@ -10,55 +10,86 @@ export type RealtimeEvent =
   | { type: "reveal"; matchId: string; revealLevel: number };
 
 /**
- * Live server events over SSE (Epic 8). EventSource reconnects on its own;
- * we additionally re-open when the access token rotates or the app returns
- * from background, and expose `connected` so the UI can show the truth.
+ * ONE shared SSE connection per app instance, however many components listen.
+ * (Screens and threads both subscribe; opening a socket each would double
+ * server connections for no benefit.)
  */
+type Listener = (event: RealtimeEvent) => void;
+
+const listeners = new Set<Listener>();
+const statusListeners = new Set<(connected: boolean) => void>();
+let source: EventSource | null = null;
+let currentToken: string | null = null;
+let connected = false;
+
+function setConnected(value: boolean) {
+  connected = value;
+  statusListeners.forEach((fn) => fn(value));
+}
+
+function connect(token: string) {
+  if (source && currentToken === token) return;
+  source?.close();
+  currentToken = token;
+
+  const es = new EventSource(`${BASE_URL}/chat/stream?token=${encodeURIComponent(token)}`);
+  source = es;
+
+  es.addEventListener("ready", () => setConnected(true));
+  es.onopen = () => setConnected(true);
+  es.onerror = () => setConnected(false); // EventSource retries on its own
+
+  for (const type of ["message", "typing", "read", "reveal"] as const) {
+    es.addEventListener(type, (e) => {
+      try {
+        const parsed = JSON.parse((e as MessageEvent).data) as RealtimeEvent;
+        listeners.forEach((fn) => fn(parsed));
+      } catch {
+        // Ignore malformed frames.
+      }
+    });
+  }
+}
+
+function disconnect() {
+  source?.close();
+  source = null;
+  currentToken = null;
+  setConnected(false);
+}
+
+// Mobile WebViews suspend sockets in the background — reopen on return.
+if (typeof document !== "undefined") {
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible" && currentToken && source?.readyState === EventSource.CLOSED) {
+      const token = currentToken;
+      currentToken = null;
+      connect(token);
+    }
+  });
+}
+
 export function useRealtime(onEvent: (event: RealtimeEvent) => void) {
   const accessToken = useAuthStore((s) => s.accessToken);
-  const [connected, setConnected] = useState(false);
+  const [isConnected, setIsConnected] = useState(connected);
   const handlerRef = useRef(onEvent);
   handlerRef.current = onEvent;
 
   useEffect(() => {
-    if (!accessToken) return;
-    let source: EventSource | null = null;
-    let closed = false;
+    const listener: Listener = (event) => handlerRef.current(event);
+    listeners.add(listener);
+    statusListeners.add(setIsConnected);
 
-    const open = () => {
-      if (closed) return;
-      source?.close();
-      source = new EventSource(`${BASE_URL}/chat/stream?token=${encodeURIComponent(accessToken)}`);
-
-      source.addEventListener("ready", () => setConnected(true));
-      source.onerror = () => setConnected(false); // EventSource retries by itself
-
-      for (const type of ["message", "typing", "read", "reveal"] as const) {
-        source.addEventListener(type, (e) => {
-          try {
-            handlerRef.current(JSON.parse((e as MessageEvent).data) as RealtimeEvent);
-          } catch {
-            // Ignore malformed frames.
-          }
-        });
-      }
-    };
-
-    open();
-
-    // Mobile browsers/WebViews suspend sockets in background — reopen on return.
-    const onVisible = () => {
-      if (document.visibilityState === "visible" && source?.readyState === EventSource.CLOSED) open();
-    };
-    document.addEventListener("visibilitychange", onVisible);
+    if (accessToken) connect(accessToken);
+    else disconnect();
 
     return () => {
-      closed = true;
-      document.removeEventListener("visibilitychange", onVisible);
-      source?.close();
-      setConnected(false);
+      listeners.delete(listener);
+      statusListeners.delete(setIsConnected);
+      // Last listener out closes the connection.
+      if (listeners.size === 0) disconnect();
     };
   }, [accessToken]);
 
-  return { connected };
+  return { connected: isConnected };
 }
