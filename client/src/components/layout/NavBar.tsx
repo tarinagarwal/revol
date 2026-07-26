@@ -7,7 +7,7 @@ import { IconButton } from "@/components/ui";
 
 const links = [
   { to: "/", label: "Home" },
-  { to: "/test-ui", label: "UI Kit" },
+  { to: "/download", label: "Download" },
 ];
 
 /**

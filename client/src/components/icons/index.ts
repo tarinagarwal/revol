@@ -26,3 +26,4 @@ export {
   ChatIcon,
 } from "./actions";
 export { CameraIcon, MicIcon, PlayIcon, PauseIcon, ImageIcon, InfinityIcon } from "./media";
+export { WindowsIcon, AndroidIcon, AppleIcon, GlobeIcon, DownloadIcon } from "./platforms";

@@ -1,6 +1,7 @@
 import { Navigate, Route, Routes } from "react-router-dom";
 import { HomeScreen } from "@/screens/HomeScreen";
 import { TestUIScreen } from "@/screens/TestUIScreen";
+import { DownloadScreen } from "@/screens/DownloadScreen";
 import { SplashScreen } from "@/screens/SplashScreen";
 import { SignInScreen } from "@/screens/auth/SignInScreen";
 import { SignUpScreen } from "@/screens/auth/SignUpScreen";
@@ -17,6 +18,7 @@ export function AppRoutes() {
       {/* Public site */}
       <Route path="/" element={<HomeScreen />} />
       <Route path="/test-ui" element={<TestUIScreen />} />
+      <Route path="/download" element={<DownloadScreen />} />
       <Route path="/splash" element={<SplashScreen />} />
 
       {/* Auth (redirect away when already signed in) */}
