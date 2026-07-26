@@ -10,12 +10,12 @@ const manifest = {
   api: "0.1.0",
   channels: {
     desktop: {
-      latest: "0.1.8",
+      latest: "0.1.9",
       feed: "github-releases",
       mandatory: false,
     },
     mobile: {
-      latest: "0.1.8",
+      latest: "0.1.9",
       minSupported: "0.1.0",
       storeUrls: {
         // Until store listings exist, "store" = latest GitHub release.
@@ -25,7 +25,7 @@ const manifest = {
       mandatory: false,
     },
     web: {
-      latest: "0.1.8",
+      latest: "0.1.9",
     },
   },
 };

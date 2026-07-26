@@ -5,6 +5,7 @@ import { Profile } from "../../db/models/Profile.js";
 import { User } from "../../db/models/User.js";
 import { Media } from "../../db/models/Media.js";
 import { Preferences, getOrCreatePreferences, type PreferencesDoc } from "../../db/models/Preferences.js";
+import { blockedUserIds } from "../../db/models/Block.js";
 import { getVector } from "../../lib/upstash.js";
 import { signedReadUrl } from "../../lib/storage/gcs.js";
 import { compatibilityReport } from "../ai/ai.service.js";
@@ -84,6 +85,8 @@ async function generateMatch(userId: string, day: string) {
   for (const m of myMatches) {
     for (const u of m.users) excluded.add(String(u));
   }
+  // Blocks are absolute and symmetric (Epic 9).
+  for (const id of await blockedUserIds(userId)) excluded.add(id);
 
   const likerIds = await pendingLikers(userId, excluded);
   const vectorHits = await getVector().query({
@@ -141,25 +144,32 @@ async function generateMatch(userId: string, day: string) {
 
 /** A person, serialized at a reveal level — identity gated server-side. */
 export async function personCard(candidateUserId: string, revealLevel: number) {
-  const [candidate, user] = await Promise.all([
+  const [candidate, user, prefs] = await Promise.all([
     Profile.findOne({ userId: candidateUserId }),
     User.findById(candidateUserId),
+    Preferences.findOne({ userId: candidateUserId }),
   ]);
   if (!candidate?.basics || !user) return null;
 
   const photo = await Media.findOne({ userId: candidateUserId, kind: "photo", status: "active", position: 0 });
   const photoUrl = photo ? await signedReadUrl(photo.objectPath).catch(() => null) : null;
-  const voiceUrl = candidate.voiceIntro?.objectPath
-    ? await signedReadUrl(candidate.voiceIntro.objectPath).catch(() => null)
-    : null;
+  // Their privacy choices govern what we serve about them (Epic 9).
+  const allowVoice = prefs?.privacy?.allowVoicePlayback ?? true;
+  const voiceUrl =
+    allowVoice && candidate.voiceIntro?.objectPath
+      ? await signedReadUrl(candidate.voiceIntro.objectPath).catch(() => null)
+      : null;
 
   const revealed = revealLevel === 0;
   return {
+    // Opaque id — needed to report or block, reveals nothing about identity.
+    userId: candidateUserId,
     // Identity stays veiled until the reveal.
     displayName: revealed ? user.displayName : null,
     firstInitial: user.displayName.charAt(0).toUpperCase(),
-    age: age(candidate.basics.birthdate),
-    city: candidate.basics.city,
+    verified: user.verified ?? false,
+    age: (prefs?.privacy?.showAge ?? true) ? age(candidate.basics.birthdate) : null,
+    city: (prefs?.privacy?.showCity ?? true) ? candidate.basics.city : null,
     intent: candidate.intent,
     values: candidate.values ?? [],
     interests: candidate.interests ?? [],

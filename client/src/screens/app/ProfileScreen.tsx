@@ -15,9 +15,11 @@ import {
   Spinner,
   Stack,
   Text,
+  VerifiedBadge,
   VoicePlayer,
 } from "@/components/ui";
-import { CameraIcon, ChevronRightIcon, SettingsIcon, SparkIcon, PlusIcon } from "@/components/icons";
+import { CameraIcon, ChevronRightIcon, SettingsIcon, SparkIcon, PlusIcon, ShieldIcon } from "@/components/icons";
+import { getVerificationStatus } from "@/features/safety/safety.api";
 import { getMyProfile } from "@/features/profile/profile.api";
 import { getOnboardingConfig } from "@/features/onboarding/onboarding.api";
 import { IntentStep } from "@/features/onboarding/steps/IntentStep";
@@ -43,6 +45,8 @@ export function ProfileScreen() {
 
   const profileQ = useQuery({ queryKey: ["my-profile"], queryFn: getMyProfile });
   const configQ = useQuery({ queryKey: ["onboarding-config"], queryFn: getOnboardingConfig, staleTime: Infinity });
+  const verificationQ = useQuery({ queryKey: ["verification"], queryFn: getVerificationStatus });
+  const verification = verificationQ.data;
 
   if (profileQ.isLoading || !configQ.data) {
     return (
@@ -94,9 +98,12 @@ export function ProfileScreen() {
                   {...(p.photos[0]?.url ? { src: p.photos[0].url } : {})}
                 />
                 <Stack gap={1} className="min-w-0 flex-1">
-                  <Heading level={3} className="truncate">
-                    {p.displayName}
-                  </Heading>
+                  <Row gap={2}>
+                    <Heading level={3} className="truncate">
+                      {p.displayName}
+                    </Heading>
+                    {verification?.status === "verified" && <VerifiedBadge />}
+                  </Row>
                   <Text variant="caption" tone="dim">
                     {p.age ? `${p.age}` : ""}
                     {p.age && p.city ? " · " : ""}
@@ -114,6 +121,24 @@ export function ProfileScreen() {
               </Row>
             </Stack>
           </Card>
+
+          {/* Verification */}
+          {verification?.status !== "verified" && (
+            <Card onPress={() => void navigate("/app/verify")}>
+              <Row gap={4}>
+                <span className="flex size-11 shrink-0 items-center justify-center rounded-full border border-gold/30 text-gold">
+                  <ShieldIcon size={20} />
+                </span>
+                <Stack gap={1} className="flex-1">
+                  <Text variant="body">Verify it's you</Text>
+                  <Text variant="caption" tone="dim">
+                    A quick selfie earns a verified badge. Matches trust it.
+                  </Text>
+                </Stack>
+                <ChevronRightIcon size={18} className="text-ivory-dim" />
+              </Row>
+            </Card>
+          )}
 
           {/* Photo strip */}
           <Card>

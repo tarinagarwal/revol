@@ -20,7 +20,9 @@ export type ChatMessage = {
 
 export type Conversation = {
   matchId: string;
+  userId: string;
   revealLevel: 0 | 1 | 2 | 3;
+  verified: boolean;
   displayName: string | null;
   firstInitial: string;
   chemistry: number;

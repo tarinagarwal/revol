@@ -22,6 +22,7 @@ export { AudioRecorder } from "./AudioRecorder";
 export { FilePicker } from "./FilePicker";
 export { VoicePlayer } from "./VoicePlayer";
 export { ChemistryRing } from "./ChemistryRing";
+export { VerifiedBadge } from "./VerifiedBadge";
 
 // Layout
 export { Stack, Row, Grid, Spacer, Divider, SafeArea } from "./layout";

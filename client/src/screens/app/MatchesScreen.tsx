@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { BlurImage, Card, EmptyState, Page, PageHeader, Reveal, Row, Spinner, Stack, Text } from "@/components/ui";
+import { BlurImage, Card, EmptyState, Page, PageHeader, Reveal, Row, Spinner, Stack, Text, VerifiedBadge } from "@/components/ui";
 import { HeartIcon, EyeOffIcon, ChevronRightIcon, SparkIcon } from "@/components/icons";
 import { getMatches } from "@/features/matches/matches.api";
 
@@ -61,9 +61,13 @@ export function MatchesScreen() {
                 <div className="p-4">
                   <Row gap={3}>
                     <Stack gap={1} className="min-w-0 flex-1">
-                      <Text variant="body">
-                        {m.person.displayName ?? `${m.person.firstInitial}·`}, {m.person.age}
-                      </Text>
+                      <Row gap={2}>
+                        <Text variant="body" className="truncate">
+                          {m.person.displayName ?? `${m.person.firstInitial}·`}
+                          {m.person.age ? `, ${m.person.age}` : ""}
+                        </Text>
+                        {m.person.verified && <VerifiedBadge size={11} />}
+                      </Row>
                       <Text variant="caption" tone="dim" className="truncate italic">
                         "{m.compatibility.vibe}"
                       </Text>

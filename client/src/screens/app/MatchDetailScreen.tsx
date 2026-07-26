@@ -1,5 +1,6 @@
+import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   AppHeader,
   BlurImage,
@@ -16,10 +17,14 @@ import {
   Spinner,
   Stack,
   Text,
+  VerifiedBadge,
   VoicePlayer,
+  toast,
 } from "@/components/ui";
-import { ChatIcon, EyeOffIcon, EyeIcon, SparkIcon, InfinityIcon } from "@/components/icons";
+import { ChatIcon, EyeOffIcon, EyeIcon, SparkIcon, InfinityIcon, ShieldIcon } from "@/components/icons";
 import { getMatchDetail } from "@/features/matches/matches.api";
+import { unmatch } from "@/features/safety/safety.api";
+import { ReportSheet } from "@/features/safety/ReportSheet";
 
 const revealCopy: Record<number, string> = {
   3: "Fully veiled",
@@ -32,11 +37,26 @@ const revealCopy: Record<number, string> = {
 export function MatchDetailScreen() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const [reportOpen, setReportOpen] = useState(false);
   const { data, isLoading, error } = useQuery({
     queryKey: ["match", id],
     queryFn: () => getMatchDetail(id!),
     enabled: !!id,
   });
+
+  const endMatch = async () => {
+    if (!id) return;
+    try {
+      await unmatch(id);
+      toast("Unmatched. The conversation is closed.", "info");
+      void queryClient.invalidateQueries({ queryKey: ["matches"] });
+      void queryClient.invalidateQueries({ queryKey: ["conversations"] });
+      void navigate("/app/matches");
+    } catch {
+      toast("Could not unmatch", "error");
+    }
+  };
 
   if (isLoading) {
     return (
@@ -66,7 +86,11 @@ export function MatchDetailScreen() {
   return (
     <div className="flex h-full flex-col">
       <div className="shrink-0">
-        <AppHeader title={`${p.displayName ?? `${p.firstInitial}·`}, ${p.age}`} showBack />
+        <AppHeader
+          title={`${p.displayName ?? `${p.firstInitial}·`}${p.age ? `, ${p.age}` : ""}`}
+          showBack
+          right={p.verified ? <VerifiedBadge withLabel /> : null}
+        />
       </div>
       <div className="mx-auto grid w-full min-h-0 max-w-7xl flex-1 grid-cols-1 gap-6 px-4 py-5 sm:px-6 lg:grid-cols-[minmax(0,340px)_1fr] lg:px-8 lg:py-6">
         {/* Left — the person, pinned */}
@@ -114,12 +138,21 @@ export function MatchDetailScreen() {
               <VoicePlayer url={p.voiceUrl} title="Their voice" subtitle="Heard before seen" variant="gold" />
             </div>
           )}
-          <div className="shrink-0">
+          <Stack gap={2} className="shrink-0">
             <Button fullWidth onPress={() => void navigate(`/app/chat/${m.id}`)}>
               <ChatIcon size={16} />
               {m.messageCount > 0 ? "Continue the conversation" : "Start the conversation"}
             </Button>
-          </div>
+            <Row gap={2}>
+              <Button size="sm" variant="ghost" fullWidth onPress={() => void endMatch()}>
+                Unmatch
+              </Button>
+              <Button size="sm" variant="ghost" fullWidth onPress={() => setReportOpen(true)}>
+                <ShieldIcon size={14} />
+                Report
+              </Button>
+            </Row>
+          </Stack>
         </div>
 
         {/* Right — the chemistry + substance, the only scrolling column */}
@@ -204,6 +237,16 @@ export function MatchDetailScreen() {
           </Reveal>
         </Stack>
       </div>
+
+      {p.userId && (
+        <ReportSheet
+          open={reportOpen}
+          onClose={() => setReportOpen(false)}
+          reportedUserId={p.userId}
+          matchId={m.id}
+          onReported={() => void navigate("/app/matches")}
+        />
+      )}
     </div>
   );
 }

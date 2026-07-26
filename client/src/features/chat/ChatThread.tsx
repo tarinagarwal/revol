@@ -2,7 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { cn } from "@/lib/cn";
 import { Avatar, Button, IconButton, Spinner, Stack, Text, toast } from "@/components/ui";
-import { ChevronLeftIcon, MicIcon, ArrowRightIcon, SparkIcon, CloseIcon, EyeOffIcon } from "@/components/icons";
+import { ChevronLeftIcon, MicIcon, ArrowRightIcon, SparkIcon, CloseIcon, EyeOffIcon, ShieldIcon } from "@/components/icons";
+import { ReportSheet } from "@/features/safety/ReportSheet";
 import { blobToWav } from "@/lib/audio";
 import {
   getIcebreakers,
@@ -107,6 +108,7 @@ export function ChatThread({ matchId, conversation, onBack }: Props) {
   const [peerTyping, setPeerTyping] = useState(false);
   const [recording, setRecording] = useState(false);
   const [showIcebreakers, setShowIcebreakers] = useState(false);
+  const [reportOpen, setReportOpen] = useState(false);
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const typingSentAt = useRef(0);
@@ -282,7 +284,10 @@ export function ChatThread({ matchId, conversation, onBack }: Props) {
             {peerTyping ? "typing…" : veiled ? "Veiled — depth lifts the blur" : "Revealed"}
           </Text>
         </Stack>
-        {veiled && <EyeOffIcon size={16} className="shrink-0 text-gold" />}
+        {veiled && <EyeOffIcon size={16} className="shrink-0 text-ivory-dim" />}
+        <IconButton label="Report or block" onPress={() => setReportOpen(true)}>
+          <ShieldIcon size={18} />
+        </IconButton>
       </header>
 
       {/* Transcript — the only scrolling region */}
@@ -366,6 +371,16 @@ export function ChatThread({ matchId, conversation, onBack }: Props) {
           )}
         </div>
       </div>
+
+      {conversation?.userId && (
+        <ReportSheet
+          open={reportOpen}
+          onClose={() => setReportOpen(false)}
+          reportedUserId={conversation.userId}
+          matchId={matchId}
+          onReported={onBack}
+        />
+      )}
     </div>
   );
 }

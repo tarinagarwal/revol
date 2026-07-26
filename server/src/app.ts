@@ -14,6 +14,9 @@ import { jobRoutes } from "./routes/jobs.js";
 import { matchesRoutes } from "./modules/matches/matches.routes.js";
 import { preferencesRoutes } from "./modules/preferences/preferences.routes.js";
 import { chatRoutes } from "./modules/chat/chat.routes.js";
+import { safetyRoutes } from "./modules/safety/safety.routes.js";
+import { verificationRoutes } from "./modules/verification/verification.routes.js";
+import { privacyRoutes } from "./modules/privacy/privacy.routes.js";
 import "./modules/ai/ai.jobs.js"; // registers job handlers (side effect)
 import "./modules/discovery/discovery.jobs.js"; // daily-matches cron handler
 import "./modules/chat/chat.jobs.js"; // reveal + voice-note handlers
@@ -45,6 +48,9 @@ export async function buildApp(): Promise<FastifyInstance> {
   await app.register(profileRoutes);
   await app.register(preferencesRoutes);
   await app.register(chatRoutes);
+  await app.register(safetyRoutes);
+  await app.register(verificationRoutes);
+  await app.register(privacyRoutes);
   await app.register(aiRoutes);
   await app.register(jobRoutes);
 

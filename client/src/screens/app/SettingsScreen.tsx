@@ -4,8 +4,9 @@ import { LockIcon } from "@/components/icons";
 import { useAuthStore } from "@/store/authStore";
 import { logoutRequest } from "@/features/auth/auth.api";
 import { PreferencesCard } from "@/features/preferences/PreferencesCard";
+import { PrivacyCard } from "@/features/privacy/PrivacyCard";
 
-/** /app/settings — account controls. Privacy/safety controls deepen in Epic 9. */
+/** /app/settings — discovery preferences, privacy controls, blocks, account. */
 export function SettingsScreen() {
   const navigate = useNavigate();
   const user = useAuthStore((s) => s.user);
@@ -21,6 +22,7 @@ export function SettingsScreen() {
       <PageHeader eyebrow="Account" title="Settings" />
       <Stack gap={6}>
       <PreferencesCard />
+      <PrivacyCard />
       <Card padded={false} className="px-5 py-2 sm:px-6">
         <Stack gap={0}>
           <Row gap={3} className="py-3">

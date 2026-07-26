@@ -3,8 +3,10 @@ import { api } from "@/lib/api";
 export type MatchPerson = {
   displayName: string | null;
   firstInitial: string;
-  age: number;
-  city: string;
+  verified: boolean;
+  age: number | null;
+  city: string | null;
+  userId?: string;
   intent: string | null;
   values: string[];
   interests: string[];

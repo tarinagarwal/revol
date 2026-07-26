@@ -20,6 +20,20 @@ const preferencesSchema = new Schema(
     },
     /** Pauses the daily introduction without deleting anything. */
     paused: { type: Boolean, default: false },
+
+    /** Data visibility (Epic 9). */
+    privacy: {
+      type: new Schema(
+        {
+          showCity: { type: Boolean, default: true },
+          showAge: { type: Boolean, default: true },
+          allowVoicePlayback: { type: Boolean, default: true },
+          readReceipts: { type: Boolean, default: true },
+        },
+        { _id: false },
+      ),
+      default: () => ({}),
+    },
   },
   { timestamps: true },
 );

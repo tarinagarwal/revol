@@ -15,6 +15,7 @@ import {
   Spinner,
   Stack,
   Text,
+  VerifiedBadge,
   VoicePlayer,
   toast,
 } from "@/components/ui";
@@ -84,13 +85,13 @@ function MatchView({ match, onActed }: { match: MatchCard; onActed: (mutual: boo
           <Text variant="label" tone="gold">
             Today's introduction
           </Text>
-          <Row gap={4} className="flex-wrap items-baseline">
+          <Row gap={3} className="flex-wrap items-baseline">
             <Heading level={2}>
-              {c.firstInitial}·, {c.age}
+              {c.firstInitial}·{c.age ? `, ${c.age}` : ""}
             </Heading>
+            {c.verified && <VerifiedBadge />}
             <Text variant="caption" tone="dim">
-              {c.city}
-              {c.intent ? ` · ${intentLabels[c.intent] ?? c.intent}` : ""}
+              {[c.city, c.intent ? (intentLabels[c.intent] ?? c.intent) : null].filter(Boolean).join(" · ")}
             </Text>
           </Row>
         </Stack>

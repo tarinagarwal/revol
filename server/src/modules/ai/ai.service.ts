@@ -6,6 +6,8 @@ import { compatibilityPrompt, compatibilitySchema, type CompatibilityReport } fr
 import { icebreakersPrompt, icebreakersSchema } from "../../ai/prompts/icebreakers.js";
 import { photoAnalysisSchema, photoAnalysisSystem, type PhotoAnalysis } from "../../ai/prompts/vision.js";
 import { voiceAnalysisSchema, voiceAnalysisSystem, type VoiceAnalysis } from "../../ai/prompts/voice.js";
+import { verificationCheckSchema, verificationSystem, type VerificationCheck } from "../../ai/prompts/verification.js";
+import { moderationSchema, moderationSystem, type ModerationVerdict } from "../../ai/prompts/moderation.js";
 
 /** Epic 5 capabilities — every AI feature the product uses, in one place. */
 
@@ -57,6 +59,50 @@ export async function analyzePhoto(imageBuffer: Buffer, mimeType: string): Promi
     photoAnalysisSchema,
     { model: env.AI_VISION_MODEL, temperature: 0.1 },
   );
+}
+
+/** Epic 9 — selfie vs profile photo. Never judges appearance, only identity. */
+export async function verifySelfie(
+  selfie: { buffer: Buffer; mimeType: string },
+  profilePhoto: { buffer: Buffer; mimeType: string },
+): Promise<VerificationCheck> {
+  const toUrl = (b: Buffer, m: string) => `data:${m};base64,${b.toString("base64")}`;
+  return AIService.chatJSON(
+    [
+      { role: "system", content: verificationSystem },
+      {
+        role: "user",
+        content: [
+          { type: "text", text: "IMAGE 1 — live selfie:" },
+          { type: "image_url", image_url: { url: toUrl(selfie.buffer, selfie.mimeType) } },
+          { type: "text", text: "IMAGE 2 — existing profile photo:" },
+          { type: "image_url", image_url: { url: toUrl(profilePhoto.buffer, profilePhoto.mimeType) } },
+        ],
+      },
+    ],
+    verificationCheckSchema,
+    { model: env.AI_VISION_MODEL, temperature: 0.1 },
+  );
+}
+
+/**
+ * Epic 9 — message safety filter. Fails OPEN: if the model is unreachable we
+ * must not silence real conversations, and reports still catch abuse.
+ */
+export async function moderateMessage(text: string): Promise<ModerationVerdict> {
+  try {
+    return await AIService.chatJSON(
+      [
+        { role: "system", content: moderationSystem },
+        { role: "user", content: text },
+      ],
+      moderationSchema,
+      { temperature: 0, maxTokens: 200 },
+    );
+  } catch (err) {
+    console.warn("[moderation] check failed, allowing:", (err as Error).message);
+    return { allowed: true, category: "none", severity: 0, reason: null };
+  }
 }
 
 export async function analyzeVoice(audioBuffer: Buffer, mimeType: string): Promise<VoiceAnalysis> {

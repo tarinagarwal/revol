@@ -16,6 +16,7 @@ import { ChatScreen } from "@/screens/app/ChatScreen";
 import { ProfileScreen } from "@/screens/app/ProfileScreen";
 import { PhotosScreen } from "@/screens/app/PhotosScreen";
 import { SettingsScreen } from "@/screens/app/SettingsScreen";
+import { VerificationScreen } from "@/screens/app/VerificationScreen";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { RequireAuth, RedirectIfAuth, ProtectedOutlet } from "@/features/auth/guards";
 
@@ -51,6 +52,7 @@ export function AppRoutes() {
           <Route path="/app/profile" element={<ProfileScreen />} />
           <Route path="/app/photos" element={<PhotosScreen />} />
           <Route path="/app/settings" element={<SettingsScreen />} />
+          <Route path="/app/verify" element={<VerificationScreen />} />
         </Route>
       </Route>
 

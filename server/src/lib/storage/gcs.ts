@@ -23,9 +23,15 @@ const kindConfig: Record<MediaKind, { prefix: string; maxBytes: number; contentT
   photo: { prefix: "photos", maxBytes: 15 * 1024 * 1024, contentTypes: /^image\// },
 };
 
+/** Smallest plausible real file — anything under this is empty or truncated. */
+const MIN_BYTES = 1024;
+
 export function validateMedia(kind: MediaKind, contentType: string, bytes: number): string | null {
   const cfg = kindConfig[kind];
   if (!cfg.contentTypes.test(contentType)) return `Invalid content type for ${kind}`;
+  // Empty/truncated uploads used to be accepted, then broke everything
+  // downstream (invalid data URLs, blank photos). Reject them at the door.
+  if (bytes < MIN_BYTES) return "File is empty or corrupted — please try again";
   if (bytes > cfg.maxBytes) return `File too large (max ${Math.round(cfg.maxBytes / 1024 / 1024)}MB)`;
   return null;
 }

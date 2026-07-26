@@ -1,7 +1,7 @@
 import { Media } from "../../db/models/Media.js";
 import { Profile } from "../../db/models/Profile.js";
 import { registerJobHandler } from "../../lib/jobs.js";
-import { downloadMedia } from "../../lib/storage/gcs.js";
+import { deleteMedia, downloadMedia } from "../../lib/storage/gcs.js";
 import { analyzePhoto, analyzeVoice } from "./ai.service.js";
 import { syncProfileVector } from "../onboarding/vector-sync.js";
 
@@ -25,6 +25,12 @@ registerJobHandler("photo-analyze", async (payload) => {
     description: result.description,
     flaggedReason: result.flaggedReason,
   });
+  // Epic 9 — unsafe imagery is removed outright, not merely flagged.
+  if (!result.safe) {
+    media.set("status", "deleted");
+    await deleteMedia(media.objectPath).catch(() => undefined);
+    console.warn(`[safety] photo ${mediaId} removed: ${result.flaggedReason ?? "unsafe content"}`);
+  }
   await media.save();
   console.log(`[jobs] photo ${mediaId} analyzed: human=${result.isHuman} safe=${result.safe} q=${result.quality}`);
 });

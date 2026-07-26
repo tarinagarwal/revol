@@ -20,6 +20,8 @@ const userSchema = new Schema(
     passwordHash: { type: String, required: true },
     displayName: { type: String, required: true, trim: true, maxlength: 60 },
     emailVerified: { type: Boolean, default: false },
+    /** Identity-verified badge (Epic 9) — selfie matched to profile photo. */
+    verified: { type: Boolean, default: false },
     role: { type: String, enum: ["user", "admin"], default: "user" },
     otp: { type: otpSchema, default: null },
     lastLoginAt: { type: Date, default: null },

@@ -1,7 +1,7 @@
 import { Screen, Text } from "@/components/ui";
 import { InfinityHeartIcon } from "@/components/icons";
 
-/** Entry screen — brand moment. Auth routing replaces the CTA in Epic 2. */
+/** Standalone brand moment at /splash — used for launch screens and captures. */
 export function SplashScreen() {
   return (
     <Screen centered>

@@ -2,10 +2,11 @@ import { Types } from "mongoose";
 import { Match } from "../../db/models/Match.js";
 import { Message } from "../../db/models/Message.js";
 import { User } from "../../db/models/User.js";
+import { Preferences } from "../../db/models/Preferences.js";
 import { publish } from "../../lib/realtime.js";
 import { signedReadUrl, uploadMedia, validateMedia } from "../../lib/storage/gcs.js";
 import { enqueueJob } from "../../lib/jobs.js";
-import { icebreakers } from "../ai/ai.service.js";
+import { icebreakers, moderateMessage } from "../ai/ai.service.js";
 import { evaluateReveal } from "./reveal.service.js";
 
 export class ChatError extends Error {
@@ -75,6 +76,12 @@ export async function sendText(userId: string, matchId: string, body: string) {
   if (!trimmed) throw new ChatError(400, "Message is empty");
   if (trimmed.length > 4000) throw new ChatError(400, "Message too long");
 
+  // Epic 9 — safety filter runs before anything is stored. Fails open.
+  const verdict = await moderateMessage(trimmed);
+  if (!verdict.allowed) {
+    throw new ChatError(422, verdict.reason ?? "That message can't be sent — it may harm the person receiving it.");
+  }
+
   const message = await Message.create({ matchId, senderId: userId, kind: "text", body: trimmed });
   return afterSend(match, message);
 }
@@ -108,10 +115,16 @@ export async function markRead(userId: string, matchId: string) {
   const match = await requireMembership(userId, matchId);
   const at = new Date();
   await Message.updateMany({ matchId, senderId: { $ne: userId }, readAt: null }, { readAt: at });
-  publish(
-    match.users.map(String).filter((u) => u !== userId),
-    { type: "read", matchId, userId, at: at.toISOString() },
-  );
+
+  // Read receipts are opt-out (Epic 9): if the reader disabled them, the
+  // sender isn't told — the messages are still marked read for the reader.
+  const prefs = await Preferences.findOne({ userId });
+  if (prefs?.privacy?.readReceipts ?? true) {
+    publish(
+      match.users.map(String).filter((u) => u !== userId),
+      { type: "read", matchId, userId, at: at.toISOString() },
+    );
+  }
   return { ok: true };
 }
 
@@ -138,7 +151,10 @@ export async function listConversations(userId: string) {
       const revealed = (m.revealLevel ?? 2) === 0;
       return {
         matchId: String(m._id),
+        // Opaque id so the client can report/block without knowing who they are.
+        userId: otherId,
         revealLevel: m.revealLevel ?? 2,
+        verified: other?.verified ?? false,
         displayName: revealed ? (other?.displayName ?? null) : null,
         firstInitial: (other?.displayName ?? "?").charAt(0).toUpperCase(),
         chemistry: m.compatibility?.score ?? 0,
