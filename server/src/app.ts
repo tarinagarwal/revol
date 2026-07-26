@@ -16,6 +16,9 @@ export async function buildApp(): Promise<FastifyInstance> {
   await app.register(cors, {
     // Tightened per-environment in Epic 18 (web origin + capacitor:// + file://)
     origin: true,
+    // Default is CORS-safelisted only (GET/HEAD/POST) — browsers were blocking
+    // every PUT/DELETE (all onboarding section saves). Be explicit.
+    methods: ["GET", "HEAD", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
   });
 
   await app.register(authPlugin);

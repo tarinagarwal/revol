@@ -10,7 +10,7 @@ import { ForgotPasswordScreen } from "@/screens/auth/ForgotPasswordScreen";
 import { ResetPasswordScreen } from "@/screens/auth/ResetPasswordScreen";
 import { AppHomeScreen } from "@/screens/app/AppHomeScreen";
 import { OnboardingScreen } from "@/screens/OnboardingScreen";
-import { RequireAuth, RedirectIfAuth, RequireOnboarded } from "@/features/auth/guards";
+import { RequireAuth, RedirectIfAuth, ProtectedOutlet } from "@/features/auth/guards";
 
 /** Route table. Feature epics extend the /app section. */
 export function AppRoutes() {
@@ -29,9 +29,14 @@ export function AppRoutes() {
       <Route path="/auth/forgot" element={<RedirectIfAuth><ForgotPasswordScreen /></RedirectIfAuth>} />
       <Route path="/auth/reset" element={<RedirectIfAuth><ResetPasswordScreen /></RedirectIfAuth>} />
 
-      {/* Protected app */}
+      {/* Onboarding: authed but not yet onboarded */}
       <Route path="/onboarding" element={<RequireAuth><OnboardingScreen /></RequireAuth>} />
-      <Route path="/app" element={<RequireAuth><RequireOnboarded><AppHomeScreen /></RequireOnboarded></RequireAuth>} />
+
+      {/* Protected app — EVERY in-app route nests under this guard */}
+      <Route element={<ProtectedOutlet />}>
+        <Route path="/app" element={<AppHomeScreen />} />
+        {/* Future: /app/discover, /app/matches, /app/chat/:id, /app/profile ... */}
+      </Route>
 
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

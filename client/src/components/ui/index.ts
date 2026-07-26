@@ -15,6 +15,7 @@ export { Checkbox } from "./Checkbox";
 export { Toggle } from "./Toggle";
 export { RadioGroup, type RadioOption } from "./Radio";
 export { OtpInput } from "./OtpInput";
+export { DatePicker } from "./DatePicker";
 export { Chip, ChipGroup } from "./Chip";
 export { Scale } from "./Scale";
 export { AudioRecorder } from "./AudioRecorder";

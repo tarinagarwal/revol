@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Button, ChipGroup, Input, RadioGroup, Stack, Text, toast } from "@/components/ui";
+import { Button, ChipGroup, DatePicker, Input, RadioGroup, Stack, Text, toast } from "@/components/ui";
 import { saveBasics, type OnboardingConfig } from "../onboarding.api";
 import { ApiError } from "@/lib/api";
 
@@ -48,7 +48,13 @@ export function BasicsStep({ config, initial, onSaved }: Props) {
 
   return (
     <Stack gap={8}>
-      <Input label="Birthday" type="date" value={birthdate} onChange={(e) => setBirthdate(e.target.value)} hint={`You must be ${config.rules.minAge}+. Only your age is ever shown.`} />
+      <DatePicker
+        label="Birthday"
+        value={birthdate}
+        onChange={setBirthdate}
+        maxYear={new Date().getFullYear() - config.rules.minAge}
+        hint={`You must be ${config.rules.minAge}+. Only your age is ever shown.`}
+      />
       <RadioGroup
         label="I am"
         value={gender}

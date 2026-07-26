@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { Navigate, useLocation } from "react-router-dom";
+import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { useAuthStore } from "@/store/authStore";
 import { getOnboardingState } from "@/features/onboarding/onboarding.api";
@@ -34,6 +34,21 @@ export function RequireOnboarded({ children }: { children: ReactNode }) {
     return <Navigate to="/onboarding" replace />;
   }
   return children;
+}
+
+/**
+ * Layout guard for the entire in-app section: authenticated AND onboarded.
+ * Every route nested under this Outlet is protected automatically — new
+ * app screens can never ship unguarded.
+ */
+export function ProtectedOutlet() {
+  return (
+    <RequireAuth>
+      <RequireOnboarded>
+        <Outlet />
+      </RequireOnboarded>
+    </RequireAuth>
+  );
 }
 
 /** Keeps signed-in users out of auth screens. */

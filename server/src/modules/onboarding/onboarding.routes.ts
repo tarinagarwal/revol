@@ -66,7 +66,12 @@ export async function onboardingRoutes(app: FastifyInstance): Promise<void> {
         interests: p.interests ?? null,
         prompts: p.prompts ?? null,
         voiceIntro: p.voiceIntro
-          ? { durationSec: p.voiceIntro.durationSec, url: await signedReadUrl(p.voiceIntro.objectPath) }
+          ? {
+              durationSec: p.voiceIntro.durationSec,
+              // Signing needs a service account (Cloud Run). Local dev user
+              // creds can't sign — degrade to null instead of 500ing state.
+              url: await signedReadUrl(p.voiceIntro.objectPath).catch(() => null),
+            }
           : null,
       },
     };
@@ -158,7 +163,7 @@ export async function onboardingRoutes(app: FastifyInstance): Promise<void> {
     p.set("voiceIntro", { objectPath, mimeType: file.mimetype, durationSec, transcript: null });
     p.set("onboarding.step", Math.max(p.onboarding?.step ?? 0, stepAfter("voice")));
     await p.save();
-    return { ok: true, url: await signedReadUrl(objectPath), step: p.onboarding?.step };
+    return { ok: true, url: await signedReadUrl(objectPath).catch(() => null), step: p.onboarding?.step };
   });
 
   app.delete("/onboarding/voice", async (req) => {

@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/cn";
-import { Button, Drawer, Stack, Divider } from "@/components/ui";
+import { Avatar, Button, Divider, Drawer, IconButton, Stack, Text, toast } from "@/components/ui";
 import { InfinityHeartIcon, MenuIcon, CloseIcon } from "@/components/icons";
-import { IconButton } from "@/components/ui";
+import { useAuthStore } from "@/store/authStore";
+import { logoutRequest } from "@/features/auth/auth.api";
 
 const links = [
   { to: "/", label: "Home" },
@@ -12,10 +13,12 @@ const links = [
 
 /**
  * Marketing/site navigation — fixed, translucent over the cinematic canvas,
- * hardens to solid black once scrolled. Mobile: drawer menu.
+ * hardens to solid black once scrolled. Auth-aware: signed-in users get
+ * their avatar + "Enter Revol" instead of the join CTA. Mobile: drawer menu.
  */
 export function NavBar() {
   const navigate = useNavigate();
+  const user = useAuthStore((s) => s.user);
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -25,6 +28,33 @@ export function NavBar() {
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+
+  const signOut = async () => {
+    setMenuOpen(false);
+    await logoutRequest();
+    toast("Signed out — see you soon", "info");
+    void navigate("/");
+  };
+
+  const authArea = user ? (
+    <>
+      <Button size="sm" onPress={() => void navigate("/app")}>
+        Enter Revol
+      </Button>
+      <button
+        type="button"
+        onClick={() => void navigate("/app")}
+        aria-label="Your space"
+        className="cursor-pointer rounded-full border-none bg-transparent p-0 outline-none focus-visible:ring-2 focus-visible:ring-gold/70"
+      >
+        <Avatar name={user.displayName} size="sm" ring="gold" />
+      </button>
+    </>
+  ) : (
+    <Button size="sm" onPress={() => void navigate("/auth/sign-up")}>
+      Join Revol
+    </Button>
+  );
 
   return (
     <>
@@ -41,7 +71,7 @@ export function NavBar() {
             <span className="font-display text-xl tracking-cinematic uppercase text-gold">revol</span>
           </Link>
 
-          <div className="ml-auto hidden items-center gap-8 md:flex">
+          <div className="ml-auto hidden items-center gap-6 md:flex">
             {links.map((l) => (
               <NavLink
                 key={l.to}
@@ -56,9 +86,7 @@ export function NavBar() {
                 {l.label}
               </NavLink>
             ))}
-            <Button size="sm" onPress={() => void navigate("/auth/sign-up")}>
-              Join Revol
-            </Button>
+            {authArea}
           </div>
 
           <IconButton label="Open menu" className="ml-auto md:hidden" onPress={() => setMenuOpen(true)}>
@@ -76,6 +104,17 @@ export function NavBar() {
             </IconButton>
           </div>
           <Divider />
+          {user && (
+            <div className="flex items-center gap-3">
+              <Avatar name={user.displayName} size="md" ring="gold" />
+              <Stack gap={0}>
+                <Text variant="body">{user.displayName}</Text>
+                <Text variant="caption" tone="dim">
+                  {user.email}
+                </Text>
+              </Stack>
+            </div>
+          )}
           {links.map((l) => (
             <NavLink
               key={l.to}
@@ -91,15 +130,32 @@ export function NavBar() {
               {l.label}
             </NavLink>
           ))}
-          <Button
-            fullWidth
-            onPress={() => {
-              setMenuOpen(false);
-              void navigate("/auth/sign-up");
-            }}
-          >
-            Join Revol
-          </Button>
+          {user ? (
+            <Stack gap={3}>
+              <Button
+                fullWidth
+                onPress={() => {
+                  setMenuOpen(false);
+                  void navigate("/app");
+                }}
+              >
+                Enter Revol
+              </Button>
+              <Button fullWidth variant="outline" onPress={() => void signOut()}>
+                Sign out
+              </Button>
+            </Stack>
+          ) : (
+            <Button
+              fullWidth
+              onPress={() => {
+                setMenuOpen(false);
+                void navigate("/auth/sign-up");
+              }}
+            >
+              Join Revol
+            </Button>
+          )}
         </Stack>
       </Drawer>
     </>
